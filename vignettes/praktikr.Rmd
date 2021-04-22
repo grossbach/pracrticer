@@ -1,10 +1,10 @@
 ---
-title: "practicer: Accumulated Practicing Time in Domain Experts"
+title: "praktikr: Accumulated Practicing Time in Domain Experts"
 author: "Michael Großbach"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{practicer: Accumulated Practicing Time in Domain Experts}
+  %\VignetteIndexEntry{praktikr: Accumulated Practicing Time in Domain Experts}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 bibliography: /home/grossbach/files/_sonstiges/000literaturdb.bib
@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(practicer)
+library(praktikr)
 ```
 
 ## Introduction
