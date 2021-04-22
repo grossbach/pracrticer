@@ -1,0 +1,22 @@
+Package: practicer
+Title: Retrospectively Estimated Practicing Times in Domain Experts 
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Michael",
+           family = "Großbach",
+           role = c("aut", "cre"),
+           email = "michael.grossbach@hmtm-hannover.de",
+           comment = c(ORCID = "0000-0003-1351-0985"))
+Description: A package to ease the handling of retrospectively self-estimated 
+     accumulated practicing times in domain experts like musicians, chess 
+     players, athletes etc.
+License: `use_mit_license()`
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Suggests: 
+    knitr,
+    lubridate,
+    rmarkdown
+VignetteBuilder: knitr

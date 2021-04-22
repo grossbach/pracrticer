@@ -1,0 +1,31 @@
+---
+title: "practicer: Accumulated Practicing Time in Domain Experts"
+author: "Michael Großbach"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{practicer: Accumulated Practicing Time in Domain Experts}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: /home/grossbach/files/_sonstiges/000literaturdb.bib
+csl: /home/grossbach/files/_sonstiges/frontiers-in-neuroscience.csl  
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  echo = FALSE
+)
+```
+
+```{r setup}
+library(practicer)
+```
+
+## Introduction
+
+Contains mostly wrappers around $\text{lubridate}$ functions [@Grolemund2011] to ease the handling of the subjective and often sparse practicing time estimates retrospectively collected from domain experts such as chess players, athletes and musicians.
+
+## References
+
