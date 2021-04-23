@@ -1,14 +1,16 @@
 ---
-title: "praktikr: Accumulated Practicing Time in Domain Experts"
+title: "praktikr: Cumulative Practicing Time in Domain Experts"
 author: "Michael Großbach"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{praktikr: Accumulated Practicing Time in Domain Experts}
-  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{praktikr: Cumulative Practicing Time in Domain Experts}
+  %\VignetteEngine{knitr::rmarkdown}
 bibliography: /home/grossbach/files/_sonstiges/000literaturdb.bib
 csl: /home/grossbach/files/_sonstiges/frontiers-in-neuroscience.csl  
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r, include = FALSE}
@@ -21,11 +23,106 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(praktikr)
+## ggplot2:
+ggplot2::theme_set(ggplot2::theme_light(base_size = 10))
+## knitr & kfigr:
+knitr::knit_hooks$set(anchor = kfigr::hook_anchor)
+knitr::opts_knit$set(kfigr.link = TRUE,
+                     kfigr.prefix = TRUE)
+options(knitr.kable.NA = "")
+## Constants:
+FIGREF <- "Fig." # type for pics and plots, kfigr::figr()
+TABREF <- "Tab." # type for tables, kfigr::figr()
+EQREF <- "Eq." # type for model equations, kfigr::figr()
+SRCREF <- "Src." # type for source code blocks, kfigr::figr()
 ```
 
 ## Introduction
 
-Contains mostly wrappers around $\text{lubridate}$ functions [@Grolemund2011] to ease the handling of the subjective and often sparse practicing time estimates retrospectively collected from domain experts such as chess players, athletes and musicians.
+Contains mostly wrappers around $\text{lubridate}$ functions [@Grolemund2011] to ease the handling of the subjective and often sparse practicing time estimates, retrospectively collected from domain experts such as chess players, athletes and musicians. These are used to calculate cumulative practice hours someone has spent practicing in their field of expertise. @Ericsson1993 suggested that practice makes perfect and that a cumulative 10.000 hours within 10 years make an expert. While there certainly is a correlation between cumulative practicing hours and domain expertise **[citation needed]**, it undoubtedly is only one factor in determining expertise. But it is a factor that can be 'measured' rather easily and retrospectively. And because it is easy to collect, it is often used as a proxy for expertise.
+
+The aim of this package and its accompanying vignette is not to criticize its use but rather to make researchers aware of potential pitfalls when collecting and analyzing practicing time data, and to ease handling of such data sets.
+
+## Data
+
+The included data set consists of artificial data, but simulated according to real data recorded 'in the field'.
+
+***
+
+`r kfigr::figr("LoadDataSet", type = SRCREF)`. *Load data.*
+
+```{r LoadDataSet, echo=TRUE, anchor=SRCREF}
+data("practicetime")
+```
+
+`r kfigr::figr("ShowDataSet", type = TABREF)`. *The first and the last six rows of the simulated data set.*
+
+```{r ShowDataSet}
+knitr::kable(rbind(head(practicetime),
+                   tail(practicetime)))
+```
+
+## Potential Pitfalls
+
+### The First Age Bracket
+
+When one asks participants to retrospectively estimate their practicing time in the past, it apparently is easier for people to name their average daily practicing time during a pre-defined age bracket **[citation needed]** than on a yearly basis. Combined with people's date-of-birth and the date when they filled in the questionnaire, we can calculate their current ages. Since some participants started playing their main instrument at a very early age, they estimate their mean daily practicing time in the first age bracket as, say, half an hour. The first age bracket in our data set entails the ages [0,5]. Assume participant A started playing at the age of 4 and for simplicity additionally assume that they started playing on the day they turned four. That requires them to average their practicing time at the instrument during the ensuing year to the ages 0 through 5. An average of half an hour over six years equals $0.5\text{h} = 3\text{h} / 6\text{yrs}$. This means they claim to have played an average 3 hours on each day at the age of four. Although this is technically not impossible, it seems to be a bold claim. The more probable explanation is that the question was not properly explained to the participants, invalidating the entire data set. This underlines the requirement for an experimenter to identify difficult questions and to either meticulously explain those questionnaire items to participants, or ask simpler questions.
+
+### The Last Age Bracket
+
+In addition to possibly containing answers to misunderstood questions, such data sets contain a second pitfall, and that is that the last age bracket someone fills in has usually not ended yet. So for their current age bracket participants are usually asked to provide the average daily practice hours during the years in this bracket so far. So for the analysis this must be taken into account, i.e. this bracket's average time must be recalculated to not under-estimate the practicing time of the current age bracket.
+
+***
+
+`r kfigr::figr("IndivPracticeTime", type = TABREF)`. *Artificial practicing times data of a 26-year-old participant.*
+
+```{r IndivPracticeTime, anchor=TABREF}
+## This chunk intentionally empty
+```
+
+~~~
+Age bracket          [13   -  16][17  -   20][21    -    25][26    -    30]
+
+Age, in yrs           13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30
+
+Age while              +  +  +  +  +  +  +  +  +  +  +  +  +  +
+playing an
+instrument
+
+Estimated daily           2            3           6                8
+practicing hours
+
+Multiplier                3            3           4                4
+(bracket duration)
+
+**A** Corrected           3            3           4                1
+multiplier
+
+**B** Corrected           3            3           4            **X**
+multiplier
+
+Uncorrected            2190         3285        8760            11680
+practicing hours
+
+Corrected              2190         3285        8760             2920
+practicing hours
+~~~
+
+If we ignore leap years, we calculate with uncorrected multipliers:
+
+```{r echo=TRUE}
+(2 * 3 * 365) + (3 * 3 * 365) + (6 * 4 * 365) + (8 * 4 * 365)
+```
+
+and obtain 25915 cumulative practicing hours. With the corrected multiplier for the last bracket we calculate
+
+```{r echo=TRUE}
+(2 * 3 * 365) + (3 * 3 * 365) + (6 * 4 * 365) + (8 * 1 * 365)
+```
+
+which results in 17155 cumulative practicing hours. That is a difference of 8760 hours, equivalent to one year. The relative difference is (25915 - 17155) / 25915 = `r (25915 - 17155) / 25915`. 
+
+These calculations assume that the subject played the entire year they were 26 for an average eight daily hours. If we additionally take into account that leap years last an additional day, we need to include the date-of-birth and the time the subject took part in the investigation. By doing so, we can now account for leap years *and* adjust the last bracket's multiplier to the day.
 
 ## References
 

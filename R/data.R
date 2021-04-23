@@ -15,4 +15,4 @@
 #'   \item{17-20}{Mean daily practicing time in the age bracket 17 - 20}
 #'   \item{21-25}{Mean daily practicing time in the age bracket 21 - 25}
 #'   \item{26-30}{Mean daily practicing time in the age bracket 26 - 30}
-"practicetimes"
+"practicetime"
