@@ -115,11 +115,40 @@ col_lastentry = function(x) {
   idx = ifelse(is.na(x),
                0L,
                col(x))
-  apply(idx, 1, max)
+  lastentries <- apply(idx, 1, max)
+  names(lastentries) <- NULL
+  return(lastentries)
 }
-add_daily_hours <- function(x, bracket_idx = ncol(x), bracket_mult = NULL, append = TRUE) {
-  cbind(x,
-        x[ , bracket_idx] * bracket_mult * 365.25)
+#' Add Yearly Hours.
+#'
+#' @param x A data.frame (also) containing the subjective and retrospectively
+#'   provided practicing times of each participant.
+#' @param bracket_idx Optional numerical vector of size \code{ncol(x)} indexing
+#'   those columns of \code{x} that contain mean daily hours information. Not
+#'   necessary if \code{x} only has columns with daily age bracket means.
+#' @param bracket_mult A numerical vector giving the durations of each age
+#'   bracket.
+#' @param append A logic value determining whether the function is to return the
+#'   yearly hours appended to \code{x} (TRUE; default), or just the yearly
+#'   hours.
+#'
+#' @return If \code{append = TRUE} a data.frame of size \code{nrow(x) x (ncol(x)
+#'   + length(bracket_idx))}. If \code{append = FALSE} a data.frame of size
+#'   \code{nrow(x) x length(bracket_idx)}.
+#' @export
+#'
+#' @examples
+#' d_f <- data.frame(ID = c(1, 2), `10-12` = c(1.5, 1.0), `13-14` = c(3, 0.75), check.names = FALSE)
+#' index <- c(2, 3)
+#' add_daily
+add_yearly_hours <- function(x, bracket_idx = ncol(x), bracket_mult = NULL, append = TRUE) {
+  daily_hours <- x[ , bracket_idx] * bracket_mult * 365.25
+  if (append) {
+    cbind(x,
+          daily_hours)
+  } else {
+    daily_hours
+  }
 }
 #' Convert Column Names to Age Bracket Durations.
 #'

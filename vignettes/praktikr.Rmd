@@ -1,11 +1,11 @@
 ---
-title: "praktikr: Cumulative Practicing Time in Domain Experts"
+title: "praktikr: Cumulative Practice Time in Domain Experts"
 author: "Michael Großbach"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteEncoding{UTF-8}
-  %\VignetteIndexEntry{praktikr: Cumulative Practicing Time in Domain Experts}
+  %\VignetteIndexEntry{praktikr: Cumulative Practice Time in Domain Experts}
   %\VignetteEngine{knitr::rmarkdown}
 bibliography: /home/grossbach/files/_sonstiges/000literaturdb.bib
 csl: /home/grossbach/files/_sonstiges/frontiers-in-neuroscience.csl  
@@ -21,27 +21,31 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+```{r setup, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(kfigr)
+library(knitr)
 library(praktikr)
 ## ggplot2:
-ggplot2::theme_set(ggplot2::theme_light(base_size = 10))
+theme_set(theme_light(base_size = 10))
 ## knitr & kfigr:
-knitr::knit_hooks$set(anchor = kfigr::hook_anchor)
-knitr::opts_knit$set(kfigr.link = TRUE,
+knit_hooks$set(anchor = hook_anchor)
+opts_knit$set(kfigr.link = TRUE,
                      kfigr.prefix = TRUE)
 options(knitr.kable.NA = "")
 ## Constants:
-FIGREF <- "Fig." # type for pics and plots, kfigr::figr()
-TABREF <- "Tab." # type for tables, kfigr::figr()
-EQREF <- "Eq." # type for model equations, kfigr::figr()
-SRCREF <- "Src." # type for source code blocks, kfigr::figr()
+FIGREF <- "Fig." # type for pics and plots, figr()
+TABREF <- "Tab." # type for tables, figr()
+EQREF <- "Eq." # type for model equations, figr()
+SRCREF <- "Src." # type for source code blocks, figr()
 ```
 
 ## Introduction
 
-Contains mostly wrappers around $\text{lubridate}$ functions [@Grolemund2011] to ease the handling of the subjective and often sparse practicing time estimates, retrospectively collected from domain experts such as chess players, athletes and musicians. These are used to calculate cumulative practice hours someone has spent practicing in their field of expertise. @Ericsson1993 suggested that practice makes perfect and that a cumulative 10.000 hours within 10 years make an expert. While there certainly is a correlation between cumulative practicing hours and domain expertise **[citation needed]**, it undoubtedly is only one factor in determining expertise. But it is a factor that can be 'measured' rather easily and retrospectively. And because it is easy to collect, it is often used as a proxy for expertise.
+Contains mostly wrappers around $\text{lubridate}$ functions [@Grolemund2011] to ease the handling of the subjective and often sparse practice time estimates, retrospectively collected from domain experts such as chess players, athletes and musicians. These are used to calculate cumulative practice hours someone has spent practice in their field of expertise. @Ericsson1993 suggested that practice makes perfect and that a cumulative 10.000 hours within 10 years make an expert. While there certainly is a correlation between cumulative practice hours and domain expertise **[citation needed]**, it undoubtedly is only one factor in determining expertise. But it is a factor that can be 'measured' rather easily and retrospectively. And because it is easy to collect, it is often used as a proxy for expertise.
 
-The aim of this package and its accompanying vignette is not to criticize its use but rather to make researchers aware of potential pitfalls when collecting and analyzing practicing time data, and to ease handling of such data sets.
+The aim of this package and its accompanying vignette is not to criticize its use but rather to make researchers aware of potential pitfalls when collecting and analyzing practice time data, and to ease handling of such data sets.
 
 ## Data
 
@@ -49,93 +53,98 @@ The included data set consists of artificial data, but simulated according to re
 
 ***
 
-`r kfigr::figr("LoadDataSet", type = SRCREF)`. *Load data.*
+`r figr("LoadDataSet", type = SRCREF)`. *Load data.*
 
 ```{r LoadDataSet, echo=TRUE, anchor=SRCREF}
 data("practicetime")
 ```
 
-`r kfigr::figr("ShowDataSet", type = TABREF)`. *The first and the last six rows of the simulated data set.*
+`r figr("ShowDataSet", type = TABREF)`. *The first and the last six rows of the simulated data set.*
 
 ```{r ShowDataSet}
-knitr::kable(rbind(head(practicetime),
-                   tail(practicetime)))
+kable(rbind(head(practicetime),
+            tail(practicetime)))
 ```
 
 ## Potential Pitfalls
 
 ### The First Age Bracket
 
-When one asks participants to retrospectively estimate their practicing time in the past, it apparently is easier for people to name their average daily practicing time during a pre-defined age bracket **[citation needed]** than on a yearly basis. Combined with people's date-of-birth and the date when they filled in the questionnaire, we can calculate their current ages. Since some participants started playing their main instrument at a very early age, they estimate their mean daily practicing time in the first age bracket as, say, half an hour. The first age bracket in our data set entails the ages [0,5]. Assume participant A started playing at the age of 4 and for simplicity additionally assume that they started playing on the day they turned four. That requires them to average their practicing time at the instrument during the ensuing year to the ages 0 through 5. An average of half an hour over six years equals $0.5\text{h} = 3\text{h} / 6\text{yrs}$. This means they claim to have played an average 3 hours on each day at the age of four. Although this is technically not impossible, it seems to be a bold claim. The more probable explanation is that the question was not properly explained to the participants, invalidating the entire data set. This underlines the requirement for an experimenter to identify difficult questions and to either meticulously explain those questionnaire items to participants, or ask simpler questions.
+When one asks participants to retrospectively estimate their practice time in the past, it apparently is easier for people to name their average daily practice time during a pre-defined age bracket **[citation needed]** than on a yearly basis. Combined with people's date-of-birth and the date when they filled in the questionnaire, we can calculate their ages at the time of the study. Some participants in the above shown example data set started playing their main instrument at a very early age. They estimate their mean daily practice time in the first age bracket as, e.g. half an hour. The first age bracket in our data set entails the ages [0,5]. Assume participant A started playing at the age of 4 and, for simplicity, additionally assume that they started playing on the day they turned four. That requires them to average their practice time at the instrument during the ensuing year over the ages 0 through 5. An average of half an hour over six years equals $0.5\text{h} = 3\text{h} / 6\text{yrs}$. This means they claim to have played an average 3 hours on each day at the age of four. Although this is technically not impossible, it seems to be a bold claim. The more probable explanation is that the question was not properly explained to the participants, thus invalidating the entire data set. This underlines the requirement for an experimenter to identify difficult questions in pilot studies, and consequentially to either meticulously explain those questionnaire items to participants, or ask simpler questions.
 
 ### The Last Age Bracket
 
-In addition to possibly containing answers to misunderstood questions, such data sets contain a second pitfall, and that is that the last age bracket someone fills in has usually not ended yet. So for their current age bracket participants are usually asked to provide the average daily practice hours during the years in this bracket so far. So for the analysis this must be taken into account, i.e. this bracket's average time must be recalculated to not under-estimate the practicing time of the current age bracket.
+In addition to containing answers to possibly misunderstood questions, such data sets may contain a second pitfall, and that is that the last age bracket someone fills in has usually not ended yet. So for the age bracket participants are in at the time of the study, subjects are usually asked to provide the average daily practice hours during the years in this bracket so far. For the analysis this must be taken into account, i.e. these brackets' average times must be recalculated to not under-estimate practice times of the age brackets every participant was in at the time of the study.
 
 ***
 
-`r kfigr::figr("IndivPracticeTime", type = TABREF)`. *Artificial practicing times data of a 26-year-old participant.*
+`r figr("IndivPracticeTime", type = TABREF)`. *Artificial practice times data of a 26-year-old participant.*
 
 ```{r IndivPracticeTime, anchor=TABREF}
 ## This chunk intentionally empty
 ```
 
 ~~~
-Age bracket          [13   -  16][17  -   20][21    -    25][26    -    30]
-
-Age, in yrs           13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30
-
-Age while              +  +  +  +  +  +  +  +  +  +  +  +  +  +
-playing an
-instrument
-
-Estimated daily           2            3           6                8
-practicing hours
-
-Multiplier                3            3           4                4
-(bracket duration)
-
-**A** Corrected           3            3           4                1
-multiplier
-
-**B** Corrected           3            3           4            **X**
-multiplier
-
-Uncorrected            2190         3285        8760            11680
-practicing hours
-
-Corrected              2190         3285        8760             2920
-practicing hours
+Age bracket          [13   -   16]   [17  -   20]   [21     -    25]   [26    -    30]
+______________________________________________________________________________________
+Age, in yrs           13 14 15 16  |  17 18 19 20 |  21 22 23 24 25  |  26 27 28 29 30
+                                   |              |                  |
+Active playing         +  +  +  +  |   +  +  +  + |   +  +  +  +  +  |   +
+an instrument                      |              |                  |
+                                   |              |                  |
+Estimated daily            2       |      3       |         6        |        8
+practice hours                     |              |                  |
+                                   |              |                  |
+Multiplier A¹              3       |      3       |         4        |        4
+(bracket duration)                 |              |                  |
+                                   |              |                  |
+Corrected                  3       |      3       |         4        |        1
+multiplier B²                      |              |                  |
+                                   |              |                  |
+Corrected                  3       |      3       |         4        |    **X**
+multiplier C³                      |              |                  |
+                                   |              |                  |
+Uncorrected practice  2190         |   3285       |      8760        |    11680
+hours/bracket¹                     |              |                  |
+                                   |              |                  |
+Corrected practice    2190         |   3285       |      8760        |     2920
+hours/bracket²                     |              |                  |
+                                   |              |                  |
+Corrected practice   **X**         |  **X**       |     **X**        |    **X**
+hours/bracket³                     |              |                  |
+______________________________________________________________________________________
 ~~~
+Notes: ¹) The multiplier for an age bracket is the bracket's duration in years. ²) The last (i.e. right-most) bracket a participant provides an entry for is multiplied by how many years this participant actually 'spent' in this bracket. ³) With 
 
-If we ignore leap years, we calculate with uncorrected multipliers:
+***
+
+Should we choose to ignore leap years, we calculate with uncorrected multipliers:
 
 ```{r echo=TRUE}
 (2 * 3 * 365) + (3 * 3 * 365) + (6 * 4 * 365) + (8 * 4 * 365)
 ```
 
-and obtain 25915 cumulative practicing hours. With the corrected multiplier for the last bracket we calculate
+and obtain 25915 cumulative practice hours for subject A.
+
+Since there is a leap year every fourth year, we can do better and hope that, on average, this pans out:
 
 ```{r echo=TRUE}
-(2 * 3 * 365) + (3 * 3 * 365) + (6 * 4 * 365) + (8 * 1 * 365)
+(2 * 3 * 365.25) + (3 * 3 * 365.25) + (6 * 4 * 365.25) + (8 * 4 * 365.25)
 ```
 
-which results in 17155 cumulative practicing hours. That is a difference of 8760 hours, equivalent to one year. The relative difference is (25915 - 17155) / 25915 = `r (25915 - 17155) / 25915`. 
+One must be aware though that individual cumulative practice hours calculated this way would *not* reflect a person's 'true' sum of hours spent at the instrument--even if they all had remembered their practice times for each bracket correctly. If the sample size and the sampling duration were large enough one could assume that the group average would be truly representative of the sample (again assuming only correct answers were given).
 
-```{r , eval=FALSE, anchor=SRCREF}
-# Nee, lass ma'!
-# Should the names of the columns with the age brackets contain more than just the age range one needs to remove these:
-bracket_col_prefix <- "Age range " # prefix to remove
-# bracket_cols_names <- grep(bracket_col_prefix, # col names containing prefix
-#                            names(practicetime),
-#                            value = TRUE,
-#                            fixed = TRUE)
-names(practicetime) <- sub(pattern = bracket_col_prefix,
-                           replacement = "",
-                           names(practicetime))
+With the corrected multiplier for the last bracket we calculate
+
+```{r echo=TRUE}
+(2 * 3 * 365.25) + (3 * 3 * 365.25) + (6 * 4 * 365.25) + (8 * 1 * 365.25)
 ```
 
-```{r}
+which results in 17166.75 cumulative practice hours for A. This is a difference of 8766 hours, equivalent to one year! The relative difference is (25915 - 17166.75) / 25915 $\approx$ `r round((25915 - 17155) / 25915, 2)`, or `r -round((1 - (25915 - 17155) / 25915) * 100)`%. 
+
+Do this for the data set:
+
+```{r, echo=TRUE}
 ## Add bracket multipliers:
 ## Either find the age range column indexes by matching a unique pattern, e.g. "^[0-9]{1,2}-[0-9]{1,2}$"
 age_range_idx <- grep("[0-9]{1,2}-[0-9]{1,2}", 
@@ -149,30 +158,36 @@ multipliers <- bracket_multipliers(practicetime,
                                    sep = "-")
 ```
 
-```{r}
-practicetime_dh <- add_daily_hours(practicetime, 
-                                   bracket_idx = age_range_idx, 
-                                   bracket_mult = multipliers)
+```{r, echo=TRUE}
+practicetime_dh <- add_yearly_hours(practicetime, 
+                                    bracket_idx = age_range_idx, 
+                                    bracket_mult = multipliers)
 
 ```
 
-These calculations assume that subject A played the entire year they were 26 for an average eight daily hours. If we additionally take into account that leap years last an additional day, we need to include the date-of-birth and the time the subject took part in the investigation. By doing so, we can now account for leap years *and* adjust the last bracket's multiplier to the day.
+```{r}
+kable(rbind(head(practicetime_dh),
+            tail(practicetime_dh)))
+```
+
+These calculations assume that subject A played the entire year when they were 26 years old for an average eight daily hours. If we additionally take into account that leap years last an additional day, we need to include the date-of-birth and the time the subject took part in the investigation. By doing so, we can account for leap years *and* adjust the last bracket's multiplier to the day.
 
 ## A More Sophisticated Approach
 
-```{r}
+```{r, echo=TRUE}
 ## add age and days since last birthday:
-practicetime <- dplyr::mutate(practicetime,
-                              Age = praktikr::days_lived(DOB, 
-                                                         Date),
-                              DaysSinceLastBday = praktikr::days_since_bday(DOB, 
-                                                                            Date))
+practicetime <- mutate(practicetime,
+                       Age = days_lived(DOB, 
+                                        Date),
+                       DaysSinceLastBday = days_since_bday(DOB, 
+                                                           Date))
 ```
 
-```{r}
+```{r, echo=TRUE}
 ## Find last age bracket column for each subject:
-last_bracket_idx <- col_lastentry(practicetime[age_range_idx])
-complete_yrs_spent_in_bracket <- practicetime$
+last_bracket_idx <- col_lastentry(practicetime[age_range_idx]) + 
+  age_range_idx[1] - 1
+# complete_yrs_spent_in_bracket <- last
 
 ```
 
