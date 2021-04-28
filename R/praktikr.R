@@ -66,7 +66,7 @@ days_since_bday <- function(dob, today = Sys.Date()) {
 #' Age Bracket Multiplier.
 #'
 #' @param df A data.frame (also) containing the subjective and retrospectively
-#'   provided practicing times of each participant.
+#'   provided practice times of each participant.
 #' @param bracket_idx A numerical vector indexing the bracket columns. If not
 #'   provided, the entire data.frame is assumed to only contain age bracket
 #'   columns.
@@ -119,10 +119,12 @@ col_lastentry = function(x) {
   names(lastentries) <- NULL
   return(lastentries)
 }
-#' Add Yearly Hours.
+#' Bracket Hours.
+#'
+#' Calculates the hours subjects have been practice during age brackets.
 #'
 #' @param x A data.frame (also) containing the subjective and retrospectively
-#'   provided practicing times of each participant.
+#'   provided practice times of each participant.
 #' @param bracket_idx Optional numerical vector of size \code{ncol(x)} indexing
 #'   those columns of \code{x} that contain mean daily hours information. Not
 #'   necessary if \code{x} only has columns with daily age bracket means.
@@ -140,14 +142,17 @@ col_lastentry = function(x) {
 #' @examples
 #' d_f <- data.frame(ID = c(1, 2), `10-12` = c(1.5, 1.0), `13-14` = c(3, 0.75), check.names = FALSE)
 #' index <- c(2, 3)
-#' add_daily
-add_yearly_hours <- function(x, bracket_idx = ncol(x), bracket_mult = NULL, append = TRUE) {
-  daily_hours <- x[ , bracket_idx] * bracket_mult * 365.25
+#' bracket_hours(d_f, index, c(3, 2))
+bracket_hours <- function(x, bracket_idx = 1:ncol(x), bracket_mult = NULL, append = TRUE) {
+  bracket_hours <- x[ , bracket_idx] * bracket_mult * 365.25
+  names(bracket_hours) <- paste("Hours",
+                                names(x[bracket_idx]),
+                                sep = "_")
   if (append) {
     cbind(x,
-          daily_hours)
+          bracket_hours)
   } else {
-    daily_hours
+    bracket_hours
   }
 }
 #' Convert Column Names to Age Bracket Durations.
