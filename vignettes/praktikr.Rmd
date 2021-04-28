@@ -138,7 +138,7 @@ names(practicetime) <- sub(pattern = bracket_col_prefix,
 ```{r}
 ## Add bracket multipliers:
 ## Either find the age range column indexes by matching a unique pattern, e.g. "^[0-9]{1,2}-[0-9]{1,2}$"
-age_range_idx <- grep("^[0-9]{1,2}-[0-9]{1,2}$", 
+age_range_idx <- grep("[0-9]{1,2}-[0-9]{1,2}", 
                       names(practicetime))
 ## Or provide the column indices explicitly:
 # age_range_idx <- c(4:10) 
