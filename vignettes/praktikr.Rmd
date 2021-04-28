@@ -122,7 +122,59 @@ and obtain 25915 cumulative practicing hours. With the corrected multiplier for 
 
 which results in 17155 cumulative practicing hours. That is a difference of 8760 hours, equivalent to one year. The relative difference is (25915 - 17155) / 25915 = `r (25915 - 17155) / 25915`. 
 
-These calculations assume that the subject played the entire year they were 26 for an average eight daily hours. If we additionally take into account that leap years last an additional day, we need to include the date-of-birth and the time the subject took part in the investigation. By doing so, we can now account for leap years *and* adjust the last bracket's multiplier to the day.
+```{r , eval=FALSE, anchor=SRCREF}
+# Nee, lass ma'!
+# Should the names of the columns with the age brackets contain more than just the age range one needs to remove these:
+bracket_col_prefix <- "Age range " # prefix to remove
+# bracket_cols_names <- grep(bracket_col_prefix, # col names containing prefix
+#                            names(practicetime),
+#                            value = TRUE,
+#                            fixed = TRUE)
+names(practicetime) <- sub(pattern = bracket_col_prefix,
+                           replacement = "",
+                           names(practicetime))
+```
+
+```{r}
+## Add bracket multipliers:
+## Either find the age range column indexes by matching a unique pattern, e.g. "^[0-9]{1,2}-[0-9]{1,2}$"
+age_range_idx <- grep("^[0-9]{1,2}-[0-9]{1,2}$", 
+                      names(practicetime))
+## Or provide the column indices explicitly:
+# age_range_idx <- c(4:10) 
+## The multipliers reflect the duration of each bracket in
+## each subject:
+multipliers <- bracket_multipliers(practicetime,
+                                   age_range_idx,
+                                   sep = "-")
+```
+
+```{r}
+practicetime_dh <- add_daily_hours(practicetime, 
+                                   bracket_idx = age_range_idx, 
+                                   bracket_mult = multipliers)
+
+```
+
+These calculations assume that subject A played the entire year they were 26 for an average eight daily hours. If we additionally take into account that leap years last an additional day, we need to include the date-of-birth and the time the subject took part in the investigation. By doing so, we can now account for leap years *and* adjust the last bracket's multiplier to the day.
+
+## A More Sophisticated Approach
+
+```{r}
+## add age and days since last birthday:
+practicetime <- dplyr::mutate(practicetime,
+                              Age = praktikr::days_lived(DOB, 
+                                                         Date),
+                              DaysSinceLastBday = praktikr::days_since_bday(DOB, 
+                                                                            Date))
+```
+
+```{r}
+## Find last age bracket column for each subject:
+last_bracket_idx <- col_lastentry(practicetime[age_range_idx])
+complete_yrs_spent_in_bracket <- practicetime$
+
+```
 
 ## References
 
