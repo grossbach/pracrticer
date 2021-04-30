@@ -106,7 +106,7 @@ In addition to containing answers to possibly misunderstood questions, such data
 
 ***
 
-`r figr("IndivPracticeTime", type = TABREF)`. *Artificial practice times data of a 26-year-old participant.*
+`r figr("IndivPracticeTime", type = TABREF)`. *Artificial practice times data of a 26-year-old participant. The first row shows the age brackets for which the participants were asked to retrospectively provide estimates of their mean daily practice time (in hours). To underscore the unequal durations of brackets in this hypothetical study, the row* Age, in yrs *lists the age the participants were in the corresponding age brackets. The row* Played an instrument *has a cross (+) for each age in which the participant played the instrument.* Estimated daily practice hours *lists the times provided by the participant.* Multiplier¹ *is simply the bracket duration (in years, not accounting for leap years; see also note below table).* Corrected multiplier² *shortens the duration of a subject's last bracket to the number of years this person actually lived through this bracket.* Corrected multiplier³ *additionally takes into account the date-of-birth of a person and corrects the bracket durations for leap years. The rows containing * practice hours per bracket 
 
 ```{r IndivPracticeTime, anchor=TABREF}
 ## This chunk intentionally empty
@@ -114,35 +114,35 @@ In addition to containing answers to possibly misunderstood questions, such data
 
 ~~~
 Age bracket          [13   -   16]   [17  -   20]   [21     -    25]   [26    -    30]
-______________________________________________________________________________________
+___________________________________|______________|__________________|________________
 Age, in yrs           13 14 15 16  |  17 18 19 20 |  21 22 23 24 25  |  26 27 28 29 30
                                    |              |                  |
-Active playing         +  +  +  +  |   +  +  +  + |   +  +  +  +  +  |   +
-an instrument                      |              |                  |
+Played an              +  +  +  +  |   +  +  +  + |   +  +  +  +  +  |   +
+instrument                         |              |                  |
                                    |              |                  |
 Estimated daily            2       |      3       |         6        |        8
 practice hours                     |              |                  |
                                    |              |                  |
-Multiplier A¹              3       |      3       |         4        |        4
-(bracket duration)                 |              |                  |
+Multiplier¹             4 x 365    |   4 x 365    |      5 x 365     |     5 x 365
+(bracket duration, days)           |              |                  |
                                    |              |                  |
-Corrected                  3       |      3       |         4        |        1
-multiplier B²                      |              |                  |
+Corrected             4 x 365.25   |  4 x 365.25  |     5 x 365.25   |    1 x 365.25
+multiplier (days)²                 |              |                  |
                                    |              |                  |
-Corrected                  3       |      3       |         4        |    **X**
-multiplier C³                      |              |                  |
+Corrected             (1 x 366) +  | (1 x 366) +  |    (2 x 366) +   |       158
+multiplier (days)³    (3 x 365)    | (3 x 365)    |    (3 x 365)     |
                                    |              |                  |
-Uncorrected practice  2190         |   3285       |      8760        |    11680
-hours/bracket¹                     |              |                  |
+Practice                2920       |    4380      |     10950        |     14600
+hours per bracket¹                 |              |                  |
                                    |              |                  |
-Corrected practice    2190         |   3285       |      8760        |     2920
-hours/bracket²                     |              |                  |
+Corrected practice      2922       |    4383      |     10957.5      |      2922
+hours per bracket²                 |              |                  |
                                    |              |                  |
-Corrected practice   **X**         |  **X**       |     **X**        |    **X**
-hours/bracket³                     |              |                  |
+Corrected practice     1827       |  **X**       |     **X**        |      1264
+hours per bracket³                 |              |                  |
 ______________________________________________________________________________________
 ~~~
-Notes: ¹) The multiplier for an age bracket is the bracket's duration in years. ²) The last (i.e. right-most) bracket a participant provides an entry for is multiplied by how many years this participant actually 'spent' in this bracket. ³) With 
+*Notes:* ¹) The multiplier for an age bracket is the bracket's duration in years. ²) The last (i.e. right-most) bracket a participant provides an entry for is multiplied by how many years this participant actually 'spent' in this bracket. ³) With the actual calendar years spent in each bracket, leap years can be taken into account, resulting in the same bracket having differing durations for different subjects (more exactly: for people with different birth dates).
 
 ***
 
