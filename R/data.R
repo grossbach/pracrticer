@@ -1,13 +1,13 @@
-#' Practicing Times of Musicians.
+#' Delibearte Practice Times of Musicians.
 #'
 #' Students at a conservatory were asked to retrospectively estimate the average
-#' daily time spent at the (main) instrument in seven age brackets.
+#' daily time spent at the (main) instrument during seven age brackets.
 #'
 #' @format A data frame with 68 rows and 10 variables:
 #' \describe{
 #'   \item{ID}{subject ID}
 #'   \item{DOB}{Date of birth, in YYYY-MM-DD format}
-#'   \item{Date}Date of lab visit}
+#'   \item{Date}{Date of lab visit}
 #'   \item{0-5}{Mean daily practicing time in the age bracket 0 - 5}
 #'   \item{6-8}{Mean daily practicing time in the age bracket 6 - 8}
 #'   \item{9-12}{Mean daily practicing time in the age bracket 9 - 12}
