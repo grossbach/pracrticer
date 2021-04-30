@@ -26,6 +26,7 @@ library(dplyr)
 library(ggplot2)
 library(kfigr)
 library(knitr)
+library(lubridate)
 library(praktikr)
 ## ggplot2:
 theme_set(theme_light(base_size = 10))
@@ -146,7 +147,8 @@ Do this for the data set:
 
 ```{r, echo=TRUE}
 ## Add bracket multipliers:
-## Either find the age range column indexes by matching a unique pattern, e.g. "^[0-9]{1,2}-[0-9]{1,2}$"
+## Either find the age range column indexes by matching a unique pattern, 
+## e.g. "^[0-9]{1,2}-[0-9]{1,2}$":
 age_range_idx <- grep("[0-9]{1,2}-[0-9]{1,2}", 
                       names(practicetime))
 ## Or provide the column indices explicitly:
@@ -159,36 +161,44 @@ multipliers <- bracket_multipliers(practicetime,
 ```
 
 ```{r, echo=TRUE}
-practicetime_dh <- add_yearly_hours(practicetime, 
-                                    bracket_idx = age_range_idx, 
-                                    bracket_mult = multipliers)
+# bracket hours:
+practicetime_yh <- bracket_hours(practicetime, 
+                                bracket_idx = age_range_idx, 
+                                bracket_mult = multipliers)
 
 ```
 
 ```{r}
-kable(rbind(head(practicetime_dh),
-            tail(practicetime_dh)))
+old_opt <- options(knitr.kable.NA = "-")
+kable(rbind(head(practicetime_yh),
+            tail(practicetime_yh)), row.names = FALSE)
+options(knitr.kable.NA = old_opt)
 ```
 
-These calculations assume that subject A played the entire year when they were 26 years old for an average eight daily hours. If we additionally take into account that leap years last an additional day, we need to include the date-of-birth and the time the subject took part in the investigation. By doing so, we can account for leap years *and* adjust the last bracket's multiplier to the day.
+These calculations assume that the hypothetical subject A played the entire year when they were 26 years old for an average eight daily hours. If we additionally take into account that leap years last an additional day, we need to include the date-of-birth and the time the subject took part in the investigation. By doing so, we can account for leap years *and* adjust the last bracket's multiplier to the day. And that is what we are going to do next.
 
 ## A More Sophisticated Approach
 
 ```{r, echo=TRUE}
 ## add age and days since last birthday:
-practicetime <- mutate(practicetime,
-                       Age = days_lived(DOB, 
-                                        Date),
-                       DaysSinceLastBday = days_since_bday(DOB, 
-                                                           Date))
+ptime_sophist <- mutate(practicetime,
+                        Age = days_lived(DOB, 
+                                         Date),
+                        DaysSinceLastBday = days_since_bday(DOB, 
+                                                            Date))
 ```
 
 ```{r, echo=TRUE}
 ## Find last age bracket column for each subject:
-last_bracket_idx <- col_lastentry(practicetime[age_range_idx]) + 
+last_bracket_idx <- col_lastentry(ptime_sophist[age_range_idx]) + 
   age_range_idx[1] - 1
-# complete_yrs_spent_in_bracket <- last
-
+## Length of each participant's last age bracket:
+durations_last_brackets <- names_to_durations(names(ptime_sophist)[last_bracket_idx])
+## Because of leap seconds, duration spent in last bracket needs to be 
+## calculated in secs (achieved by as.duration()) to be unambiguous:
+duration_spent_in_bracket <- as.duration(years(durations_last_brackets) - 
+                                           ptime_sophist$DaysSinceLastBday)
+as.numeric(duration_spent_in_bracket, "years")
 ```
 
 ## References
