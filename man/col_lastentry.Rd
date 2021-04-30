@@ -7,7 +7,7 @@
 col_lastentry(x)
 }
 \arguments{
-\item{df}{A data.frame}
+\item{x}{A data.frame.}
 }
 \value{
 A vector with column names.

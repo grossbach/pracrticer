@@ -103,7 +103,7 @@ bracket_multipliers <- function(df, bracket_idx = 1:ncol(df), sep = "-") {
 #' Returns the column index of the right-most non-NA entry of each row in a
 #' data.frame.
 #'
-#' @param df A data.frame
+#' @param x A data.frame.
 #'
 #' @return A vector with column names.
 #' @export

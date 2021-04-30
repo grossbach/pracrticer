@@ -33,7 +33,7 @@ theme_set(theme_light(base_size = 10))
 ## knitr & kfigr:
 knit_hooks$set(anchor = hook_anchor)
 opts_knit$set(kfigr.link = TRUE,
-                     kfigr.prefix = TRUE)
+              kfigr.prefix = TRUE)
 options(knitr.kable.NA = "")
 ## Constants:
 FIGREF <- "Fig." # type for pics and plots, figr()
@@ -44,43 +44,61 @@ SRCREF <- "Src." # type for source code blocks, figr()
 
 ## Introduction
 
-The $\text{R}$ package $\text{praktikr}$ contains mostly wrappers around $\text{lubridate}$ functions [@Grolemund2011] to ease the handling of the subjective and often sparse deliberate practice time estimates, retrospectively collected from domain experts such as chess players [**citation needed**] and musicians [e.g. @Ioannou2018] (see @Hambrick2014 for a review of studies on both domains). These are used to calculate cumulative practice hours someone has spent practice in their field of expertise. @Ericsson1993 and @Lehmann1998b basically suggested that practice makes perfect and that a cumulative 10.000 hours within 10 years make an expert. And, "[a]s Bengtsson et al. (2005) found, there is a high retest reliability of this method for different age groups (childhood: r.81; adolescence: r.86; adulthood: r.95)" [@Kopiez2009a]. While there certainly is a correlation between cumulative deliberate practice time and domain expertise **[citation needed; motor learning experiments?]**, it undoubtedly is only one factor in determining expertise (see, e.g. @Hambrick2014 for a critique of Ericsson's deliberate practice theory). But it is a factor that can be 'measured' rather easily and retrospectively. And because it is easy to collect, it is often used as a proxy for expertise.
+The $\text{R}$ package $\text{praktikr}$ contains mostly wrappers around $\text{lubridate}$ functions [@Grolemund2011] to ease the handling of the subjective and often sparse deliberate practice time estimates, retrospectively collected from domain experts such as chess players [**citation needed**] and musicians [e.g. @Ioannou2018] (see @Hambrick2014 for a review of studies in either domain). Mean daily hours of deliberate practice are used to calculate cumulative practice hours someone has spent practice in their field of expertise. @Ericsson1993 and @Lehmann1998b basically suggested that practice makes perfect and that a cumulative 10.000 hours within 10 years make an expert. And, "[a]s Bengtsson et al. (2005) found, there is a high retest reliability of this method for different age groups (childhood: r.81; adolescence: r.86; adulthood: r.95)" [@Kopiez2009a]. While there certainly is a correlation between cumulative deliberate practice time and domain expertise **[citation needed; motor learning experiments?]**, it undoubtedly is only one factor in determining expertise (see, e.g. @Hambrick2014 for a critique of Ericsson's deliberate practice theory). But it is a variable that can be collected both rather easily and retrospectively. And because it is easy to collect, it is often used as a proxy for expertise.
 
-The aim of this package and its accompanying vignette is not to criticize its use but rather to make researchers aware of potential pitfalls when collecting and analyzing practice time data, and to ease handling of such data sets. The underlying rationale being that even if the measure is not undisputed, it should be measured and analyzed as accurately as possible.
+The aim of this package and its accompanying vignette is not to criticize the usage of practice time as a proxy for expertise, but rather to make researchers aware of potential pitfalls when collecting and analyzing practice time data, and to ease handling of such data sets. The underlying rationale being that even if the measure is not undisputed, if used at all it should be measured and analyzed as accurately as possible.
 
 ## Installation
 
-`
+The package is as of yet not on CRAN (Comprehensive R Archive Network, a repository of $\text{R}$ packages; https://cran.r-project.org/), but can be installed in $\text{R}$ from github by issuing the following commands at the $\text{R}$ console:
+
+```{r, echo=TRUE, eval=FALSE}
 if (!require("remotes")) {
   install.packages("remotes")
 }
 remotes::install_github("grossbach/praktikr")
-`
+```
 
-## Data
+This installs the package $\text{praktikr}$ into your personal $\text{R}$ directory. To be able to use it in $\text{R}$, the canonical way is to attach it to the current $\text{R}$ session:
 
-The included data set consists of artificial data, mirroring real data collected in the field.
+```{r, echo=TRUE, eval=FALSE}
+library(praktikr)
+```
+
+## Practice Time Data
+
+The included data set `practicetime` consists of artificial data, mirroring real data collected in the field.
 
 ***
 
-`r figr("LoadDataSet", type = SRCREF)`. *Load data.*
+`r figr("LoadDataSet", type = SRCREF)`. *Load data into current $\text{R}$ session environment.*
 
 ```{r LoadDataSet, echo=TRUE, anchor=SRCREF}
 data("practicetime")
 ```
 
-`r figr("ShowDataSet", type = TABREF)`. *The first and the last six rows of the simulated data set.*
+Meta data about the data set can be accessed by:
 
-```{r ShowDataSet}
+```{r, echo=TRUE, eval=FALSE}
+?practicetime
+```
+
+***
+
+`r figr("ShowDataSet", type = TABREF)`. *The first and the last six rows of the simulated data set. ID, subject ID; DOB, date-of-birth; 0-5, mean daily hours of deliberate practice in the ages 0 through 5 years; 6-8, mean daily hours of deliberate practice in the ages 6 through 8 years; 9-12, mean daily hours of deliberate practice in the ages 9 through 12 years; 13-16, mean daily hours of deliberate practice in the ages 13 through 16 years; 17-20, mean daily hours of deliberate practice in the ages 17 through 20 years; 21-25, mean daily hours of deliberate practice in the ages 21 through 25 years; 26-30, mean daily hours of deliberate practice in the ages 26 through 30 years.*
+
+```{r ShowDataSet, anchor=TABREF}
 kable(rbind(head(practicetime),
             tail(practicetime)))
 ```
 
 ## Potential Pitfalls
 
+Looking at the data partially shown in `r figr("ShowDataSet")`, to obtain the cumulative deliberate practice time, one might be tempted to just multiply each participants' mean daily practice times (measured in hours) by 365 days per year, times the duration of the corresponding age bracket (measured in years), and then sum up all the products within a given participant. 
+
 ### The First Age Bracket
 
-When one asks participants to retrospectively estimate their practice time in the past, it apparently is easier for people to name their average daily practice time during a pre-defined age bracket **[citation needed]** than on a yearly basis. Combined with people's date-of-birth and the date when they filled in the questionnaire, we can calculate their ages at the time of the study. Some participants in the above shown example data set started playing their main instrument at a very early age. They estimate their mean daily practice time in the first age bracket as, e.g. half an hour. The first age bracket in our data set entails the ages [0,5]. Assume participant A started playing at the age of 4 and, for simplicity, additionally assume that they started playing on the day they turned four. That requires them to average their practice time at the instrument during the ensuing year over the ages 0 through 5. An average of half an hour over six years equals $0.5\text{h} = 3\text{h} / 6\text{yrs}$. This means they claim to have played an average 3 hours on each day at the age of four. Although this is technically not impossible, it seems to be a bold claim. The more probable explanation is that the question was not properly explained to the participants, thus invalidating the entire data set. This underlines the requirement for an experimenter to identify difficult questions in pilot studies, and consequentially to either meticulously explain those questionnaire items to participants, or ask simpler questions.
+When one asks participants to retrospectively estimate their practice time in the past, it apparently is easier for people to name their average daily practice time during a pre-defined age bracket **[citation needed]** than on a yearly basis. Combined with people's date-of-birth and the date when they filled in the questionnaire, we can calculate their ages at the time of the study. Some participants in the above shown example data set started playing their main instrument at a very early age. They estimated their mean daily practice time in the first age bracket as, e.g. half an hour. The first age bracket in our data set entails the ages [0,5]. Assume participant A started playing at the age of 4 and, for simplicity, additionally assume that they started playing on the day they turned four. When filling out the questionnaire, this required them to average their practice time in the following year over the ages 0 through 5. An average of half an hour over six years equals $0.5\text{h} = 3\text{h} / 6\text{yrs}$. This means they claim to have played an average 3 hours on each day at the age of four. Although this is technically not impossible, it seems to be a bold claim. The more probable explanation is that the question was not properly explained to the participants, thus invalidating the entire data set (some might have misunderstood, while others correctly ). This underlines the requirement for an experimenter to identify difficult questions in pilot studies, and consequentially to either meticulously explain those questionnaire items to participants, or ask simpler questions.
 
 ### The Last Age Bracket
 
@@ -186,7 +204,13 @@ options(knitr.kable.NA = old_opt)
 
 These calculations assume that the hypothetical subject A played the entire year when they were 26 years old for an average eight daily hours. If we additionally take into account that leap years last an additional day, we need to include the date-of-birth and the time the subject took part in the investigation. By doing so, we can account for leap years *and* adjust the last bracket's multiplier to the day. And that is what we are going to do next.
 
+### Unequal Bracket Durations
+
+It is tempting to collapse age ranges less relevant for the calculation of the cumulative practice time to brackets of longer duration. For instance, time spent at the instrument during very early age does not considerably contribute to the target number because very young children usually do not spend large amounts of time **rephrase**doing the same**/rephrase**. While collapsing is generally no problem, it should be noted that subjects need to be instructed properly to ensure they are aware of unequal bracket duration.
+
 ## A More Sophisticated Approach
+
+In the naive approach outlined above it was assumed that subjects 
 
 ```{r, echo=TRUE}
 ## add age and days since last birthday:
