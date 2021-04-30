@@ -44,13 +44,22 @@ SRCREF <- "Src." # type for source code blocks, figr()
 
 ## Introduction
 
-Contains mostly wrappers around $\text{lubridate}$ functions [@Grolemund2011] to ease the handling of the subjective and often sparse practice time estimates, retrospectively collected from domain experts such as chess players, athletes and musicians. These are used to calculate cumulative practice hours someone has spent practice in their field of expertise. @Ericsson1993 suggested that practice makes perfect and that a cumulative 10.000 hours within 10 years make an expert. While there certainly is a correlation between cumulative practice hours and domain expertise **[citation needed]**, it undoubtedly is only one factor in determining expertise. But it is a factor that can be 'measured' rather easily and retrospectively. And because it is easy to collect, it is often used as a proxy for expertise.
+The $\text{R}$ package $\text{praktikr}$ contains mostly wrappers around $\text{lubridate}$ functions [@Grolemund2011] to ease the handling of the subjective and often sparse deliberate practice time estimates, retrospectively collected from domain experts such as chess players [**citation needed**] and musicians [e.g. @Ioannou2018] (see @Hambrick2014 for a review of studies on both domains). These are used to calculate cumulative practice hours someone has spent practice in their field of expertise. @Ericsson1993 and @Lehmann1998b basically suggested that practice makes perfect and that a cumulative 10.000 hours within 10 years make an expert. And, "[a]s Bengtsson et al. (2005) found, there is a high retest reliability of this method for different age groups (childhood: r.81; adolescence: r.86; adulthood: r.95)" [@Kopiez2009a]. While there certainly is a correlation between cumulative deliberate practice time and domain expertise **[citation needed; motor learning experiments?]**, it undoubtedly is only one factor in determining expertise (see, e.g. @Hambrick2014 for a critique of Ericsson's deliberate practice theory). But it is a factor that can be 'measured' rather easily and retrospectively. And because it is easy to collect, it is often used as a proxy for expertise.
 
-The aim of this package and its accompanying vignette is not to criticize its use but rather to make researchers aware of potential pitfalls when collecting and analyzing practice time data, and to ease handling of such data sets.
+The aim of this package and its accompanying vignette is not to criticize its use but rather to make researchers aware of potential pitfalls when collecting and analyzing practice time data, and to ease handling of such data sets. The underlying rationale being that even if the measure is not undisputed, it should be measured and analyzed as accurately as possible.
+
+## Installation
+
+`
+if (!require("remotes")) {
+  install.packages("remotes")
+}
+remotes::install_github("grossbach/praktikr")
+`
 
 ## Data
 
-The included data set consists of artificial data, but simulated according to real data recorded 'in the field'.
+The included data set consists of artificial data, mirroring real data collected in the field.
 
 ***
 
