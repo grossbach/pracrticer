@@ -179,3 +179,49 @@ names_to_durations <- function(col_names = NULL, sep = NULL) {
   }
   return(duration)
 }
+#' Plot Deliberate Practice Hours Over Age Brackets.
+#'
+#' @param x A data.frame with practice hours for each age bracket, one  line per
+#'   subject. See examples.
+#' @param cols A numerical vector indexing the age bracket columns to use, or a
+#'   regular expression matching the names of the age bracket columns.
+#' @param ID A vector of size \code{nrow(x)} with unique subject IDs.
+#' @param Group A grouping vector of size \code{nrow(x)}.
+#' @param legend Logical. When \code{FALSE} (default) or \code{"none"}, no legend
+#'   is shown. All possible values for \code{ggplot2::theme(legend.position)}
+#'   are allowed.
+#'
+#' @export
+#'
+#' @examples
+#'
+plot_it <- function(x, cols = NULL, ID = "ID", Group = NULL, legend = FALSE) {
+  if (is.null(cols)) {
+    cols <- ncol(x)
+  } else if (is.character(cols)) {
+    cols <- grep(cols, names(x), perl = TRUE)
+    if (length(cols) == 0)
+      stop("The string provided in cols cannot be found in column names.")
+  }
+  x_lng <- tidyr::pivot_longer(x,
+                               cols = cols,
+                               names_to = "AgeBracket",
+                               values_to = "PracticeHours")
+  x_lng <- dplyr::mutate(x_lng,
+                         AgeBracket = factor(AgeBracket,
+                                             ordered = TRUE,
+                                             levels = unique(AgeBracket),
+                                             labels = unique(AgeBracket)))
+  lg <- if(is.logical(legend)) {
+    ifelse(!isTRUE(legend),
+           "none",
+           stop())
+  } else if(is.character(legend)) {
+    lg <- legend
+  }
+  ggplot2::ggplot(x_lng, ggplot2::aes(AgeBracket, PracticeHours,
+                                      color = ID, group = ID)) +
+    ggplot2::geom_point(na.rm = TRUE) +
+    ggplot2::geom_line(na.rm = TRUE) +
+    ggplot2::theme(legend.position = lg)
+}

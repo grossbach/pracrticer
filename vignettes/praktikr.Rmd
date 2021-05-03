@@ -24,10 +24,12 @@ knitr::opts_chunk$set(
 ```{r setup, message=FALSE}
 library(dplyr)
 library(ggplot2)
+library(ggthemes)
 library(kfigr)
 library(knitr)
 library(lubridate)
 library(praktikr)
+library(tidyr)
 ## ggplot2:
 theme_set(theme_light(base_size = 10))
 ## knitr & kfigr:
@@ -44,13 +46,13 @@ SRCREF <- "Src." # type for source code blocks, figr()
 
 ## Introduction
 
-The $\text{R}$ package $\text{praktikr}$ contains mostly wrappers around $\text{lubridate}$ functions [@Grolemund2011] to ease the handling of the subjective and often sparse deliberate practice time estimates, retrospectively collected from domain experts such as chess players [**citation needed**] and musicians [e.g. @Ioannou2018] (see @Hambrick2014 for a review of studies in either domain). Mean daily hours of deliberate practice are used to calculate cumulative practice hours someone has spent practice in their field of expertise. @Ericsson1993 and @Lehmann1998b basically suggested that practice makes perfect and that a cumulative 10.000 hours within 10 years make an expert. And, "[a]s Bengtsson et al. (2005) found, there is a high retest reliability of this method for different age groups (childhood: r.81; adolescence: r.86; adulthood: r.95)" [@Kopiez2009a]. While there certainly is a correlation between cumulative deliberate practice time and domain expertise **[citation needed; motor learning experiments?]**, it undoubtedly is only one factor in determining expertise (see, e.g. @Hambrick2014 for a critique of Ericsson's deliberate practice theory). But it is a variable that can be collected both rather easily and retrospectively. And because it is easy to collect, it is often used as a proxy for expertise.
+The $\text{R}$ package $\text{praktikr}$ contains mostly wrappers around $\text{lubridate}$ functions [@Grolemund2011] plus some convenience functions to ease handling of subjective, and often sparse, deliberate practice time estimates, retrospectively collected from domain experts such as chess players [**citation needed**; possibly in Hambrick 2014] and musicians [e.g. @Ioannou2018] (see @Hambrick2014 for a review of studies in either domain). Mean daily hours of deliberate practice are used to calculate cumulative practice hours someone has spent practice in their field of expertise. @Ericsson1993 and @Lehmann1998b basically suggested that practice makes perfect and that a cumulative 10.000 hours within 10 years make an expert. And, "[a]s Bengtsson et al. (2005) found, there is a high retest reliability of this method for different age groups (childhood: r.81; adolescence: r.86; adulthood: r.95)" [@Kopiez2009a]. While there certainly is a correlation between cumulative deliberate practice time and domain expertise **[citation needed; motor learning experiments?]**, it undoubtedly is only one factor in determining expertise (see, e.g. @Hambrick2014 for a critique of Ericsson's deliberate practice theory). But it is a variable that can be collected both rather easily and retrospectively. And because it is easy to collect, it is often used as a proxy for expertise.
 
-The aim of this package and its accompanying vignette is not to criticize the usage of practice time as a proxy for expertise, but rather to make researchers aware of potential pitfalls when collecting and analyzing practice time data, and to ease handling of such data sets. The underlying rationale being that even if the measure is not undisputed, if used at all it should be measured and analyzed as accurately as possible.
+The aim of this vignette is not to criticize the usage of practice time as a proxy for expertise, but rather to make researchers aware of potential pitfalls when collecting and analyzing practice time data, and to show how to ease handling of such data sets. The underlying rationale being that even if the measure is not undisputed, if used at all it should be measured and analyzed as accurately as possible.
 
 ## Installation
 
-The package is as of yet not on CRAN (Comprehensive R Archive Network, a repository of $\text{R}$ packages; https://cran.r-project.org/), but can be installed in $\text{R}$ from github by issuing the following commands at the $\text{R}$ console:
+The package is as of yet not on CRAN (Comprehensive R Archive Network, a repository of $\text{R}$ packages; https://cran.r-project.org/), but can be installed from github by issuing the following commands at the $\text{R}$ console:
 
 ```{r, echo=TRUE, eval=FALSE}
 if (!require("remotes")) {
@@ -63,6 +65,15 @@ This installs the package $\text{praktikr}$ into your personal $\text{R}$ direct
 
 ```{r, echo=TRUE, eval=FALSE}
 library(praktikr)
+```
+
+Further required libraries for this document are:
+
+```{r, echo=TRUE, eval=FALSE}
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(tidyr)
 ```
 
 ## Practice Time Data
@@ -83,6 +94,12 @@ Meta data about the data set can be accessed by:
 ?practicetime
 ```
 
+It resembles real data sets obtained from students at a music conservatory. Those students are usually asked to provide retrospective estimates of the time they spent at their instrument during pre-defined age brackets. The actual question might be:
+
+> On average, how many hours per day did you spend playing or rehearsing you instrument between the ages of between <lower bound>  and <upper bound>?
+
+Subjects are reminded that they are asked for the mean hours, meaning they have to take the duration of the bracket into account.
+
 ***
 
 `r figr("ShowDataSet", type = TABREF)`. *The first and the last six rows of the simulated data set. ID, subject ID; DOB, date-of-birth; 0-5, mean daily hours of deliberate practice in the ages 0 through 5 years; 6-8, mean daily hours of deliberate practice in the ages 6 through 8 years; 9-12, mean daily hours of deliberate practice in the ages 9 through 12 years; 13-16, mean daily hours of deliberate practice in the ages 13 through 16 years; 17-20, mean daily hours of deliberate practice in the ages 17 through 20 years; 21-25, mean daily hours of deliberate practice in the ages 21 through 25 years; 26-30, mean daily hours of deliberate practice in the ages 26 through 30 years.*
@@ -91,6 +108,31 @@ Meta data about the data set can be accessed by:
 kable(rbind(head(practicetime),
             tail(practicetime)))
 ```
+
+For further ease of prcessing the data it is convenient to coerce the ID column to a factor:
+
+```{r}
+practicetime %>% mutate(ID = factor(ID)) ->
+  practicetime
+```
+
+To plot the amount of mean daily hours spent at the instrument for each age bracket and each individual, one can make use of $\text{praktikr}$'s own **plot_it()** function:
+
+```{r RawData, echo=TRUE, anchor=FIGREF}
+plot_it(practicetime, cols = "\\d{1,2}")
+```
+
+`r figr("RawData", type = FIGREF)`. *Mean daily deliberate practice hours plotted against age brackets. Each line represents one participant and connects the retrospectively collected mean daily hours at the instrument of different age brackets.*
+
+***
+
+From `r figr("RawData")` we can infer that most participants started playing in the second age bracket. There is a trend visible suggesting that mean daily practice time correlates with age. Most subjects were in the second to last age bracket when the study commenced.
+
+This plot has several problems: (a) The lengths of the age brackets are uneven, tricking the onlooker into misjudging a participant's increase (or decrease) of mean daily practice hours over time. (b) Should the research question pertain to the amount of daily hours, then this plot is an adequate illustration of the data. Most of the time the researcher will be interested in practice time dynamics relative to some event---this might be the time of the study or a playing-related injury etc.
+
+(a)
+
+(b)
 
 ## Potential Pitfalls
 
@@ -106,7 +148,7 @@ In addition to containing answers to possibly misunderstood questions, such data
 
 ***
 
-`r figr("IndivPracticeTime", type = TABREF)`. *Artificial practice times data of a 26-year-old participant. The first row shows the age brackets for which the participants were asked to retrospectively provide estimates of their mean daily practice time (in hours). To underscore the unequal durations of brackets in this hypothetical study, the row* Age, in yrs *lists the age the participants were in the corresponding age brackets. The row* Played an instrument *has a cross (+) for each age in which the participant played the instrument.* Estimated daily practice hours *lists the times provided by the participant.* Multiplier¹ *is simply the bracket duration (in years, not accounting for leap years; see also note below table).* Corrected multiplier² *shortens the duration of a subject's last bracket to the number of years this person actually lived through this bracket.* Corrected multiplier³ *additionally takes into account the date-of-birth of a person and corrects the bracket durations for leap years. The rows containing * practice hours per bracket 
+`r figr("IndivPracticeTime", type = TABREF)`. *Artificial practice times data of a 26-year-old participant. The first row shows the age brackets for which the participants were asked to retrospectively provide estimates of their mean daily practice time (in hours). To underscore the unequal durations of brackets in this hypothetical study, the row* Age, in yrs *lists the age the participants were in the corresponding age brackets. The row* Played an instrument *has a plus sign (+) for each age in which the participant played the instrument.* Estimated daily practice hours *lists the times provided by the participant.* Multiplier¹ *is simply the bracket duration (in years, not accounting for leap years; see also note below table).* Corrected multiplier² *shortens the duration of a subject's last bracket to the number of years this person actually lived through this bracket.* Corrected multiplier³ *additionally takes into account the date-of-birth of a person and corrects the bracket durations for leap years. The rows containing * practice hours per bracket 
 
 ```{r IndivPracticeTime, anchor=TABREF}
 ## This chunk intentionally empty
@@ -138,15 +180,12 @@ hours per bracket¹                 |              |                  |
 Corrected practice      2922       |    4383      |     10957.5      |      2922
 hours per bracket²                 |              |                  |
                                    |              |                  |
-Corrected practice     1827       |  **X**       |     **X**        |      1264
+Corrected practice      1827       |  **X**       |     **X**        |      1264
 hours per bracket³                 |              |                  |
 ______________________________________________________________________________________
 ~~~
-*Notes:* ¹) The multiplier for an age bracket is the bracket's duration in years. ²) The last (i.e. right-most) bracket a participant provides an entry for is multiplied by how many years this participant actually 'spent' in this bracket. ³) With the actual calendar years spent in each bracket, leap years can be taken into account, resulting in the same bracket having differing durations for different subjects (more exactly: for people with different birth dates).
 
-***
-
-Should we choose to ignore leap years, we calculate with uncorrected multipliers:
+Should we choose to ignore leap years, we calculate with uncorrected multipliers¹:
 
 ```{r echo=TRUE}
 (2 * 3 * 365) + (3 * 3 * 365) + (6 * 4 * 365) + (8 * 4 * 365)
@@ -162,7 +201,7 @@ Since there is a leap year every fourth year, we can do better and hope that, on
 
 One must be aware though that individual cumulative practice hours calculated this way would *not* reflect a person's 'true' sum of hours spent at the instrument--even if they all had remembered their practice times for each bracket correctly. If the sample size and the sampling duration were large enough one could assume that the group average would be truly representative of the sample (again assuming only correct answers were given).
 
-With the corrected multiplier for the last bracket we calculate
+With the corrected multiplier² for the last bracket we calculate
 
 ```{r echo=TRUE}
 (2 * 3 * 365.25) + (3 * 3 * 365.25) + (6 * 4 * 365.25) + (8 * 1 * 365.25)
@@ -190,8 +229,8 @@ multipliers <- bracket_multipliers(practicetime,
 ```{r, echo=TRUE}
 # bracket hours:
 practicetime_yh <- bracket_hours(practicetime, 
-                                bracket_idx = age_range_idx, 
-                                bracket_mult = multipliers)
+                                 bracket_idx = age_range_idx, 
+                                 bracket_mult = multipliers)
 
 ```
 
@@ -200,6 +239,19 @@ old_opt <- options(knitr.kable.NA = "-")
 kable(rbind(head(practicetime_yh),
             tail(practicetime_yh)), row.names = FALSE)
 options(knitr.kable.NA = old_opt)
+```
+
+```{r}
+pt_yh_summary <- pivot_longer(practicetime_yh, 
+                              cols = starts_with("Hours_"), 
+                              names_to = "Bracket", 
+                              values_to = "Mean_hours_per_year")
+ggplot(pt_yh_summary, aes(Bracket, Mean_hours_per_year, 
+                          group = ID, 
+                          color = ID)) +
+  geom_point() +
+  geom_line() +
+  theme(legend.position = "none")
 ```
 
 These calculations assume that the hypothetical subject A played the entire year when they were 26 years old for an average eight daily hours. If we additionally take into account that leap years last an additional day, we need to include the date-of-birth and the time the subject took part in the investigation. By doing so, we can account for leap years *and* adjust the last bracket's multiplier to the day. And that is what we are going to do next.
