@@ -4,15 +4,17 @@
 \alias{bracket_hours}
 \title{Bracket Hours.}
 \usage{
-bracket_hours(x, bracket_idx = 1:ncol(x), bracket_mult = NULL, append = TRUE)
+bracket_hours(x, cols = 1:ncol(x), bracket_mult = NULL, append = TRUE)
 }
 \arguments{
 \item{x}{A data.frame (also) containing the subjective and retrospectively
 provided practice times of each participant.}
 
-\item{bracket_idx}{Optional numerical vector of size \code{ncol(x)} indexing
-those columns of \code{x} that contain mean daily hours information. Not
-necessary if \code{x} only has columns with daily age bracket means.}
+\item{cols}{Either NULL, then all columns are assumed to contain only age
+bracket averages; or a numerical vector of size \code{ncol(x)} indexing
+those columns of \code{x} that contain mean daily hours information; or a
+character string with the names of those columns containing age bracket
+averages.}
 
 \item{bracket_mult}{A numerical vector giving the durations of each age
 bracket.}

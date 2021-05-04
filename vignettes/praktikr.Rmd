@@ -96,9 +96,9 @@ Meta data about the data set can be accessed by:
 
 It resembles real data sets obtained from students at a music conservatory. Those students are usually asked to provide retrospective estimates of the time they spent at their instrument during pre-defined age brackets. The actual question might be:
 
-> On average, how many hours per day did you spend playing or rehearsing you instrument between the ages of between <lower bound>  and <upper bound>?
+> On average, how many hours per day did you spend playing or rehearsing you instrument between the ages of between \<lower bound\>  and \<upper bound\>?
 
-Subjects are reminded that they are asked for the mean hours, meaning they have to take the duration of the bracket into account.
+Subjects are reminded that they are asked for the mean hours, meaning they have to take the duration of the corresponding bracket into account.
 
 ***
 
@@ -109,9 +109,9 @@ kable(rbind(head(practicetime),
             tail(practicetime)))
 ```
 
-For further ease of prcessing the data it is convenient to coerce the ID column to a factor:
+For further ease of processing the data, it is convenient to coerce the ID column to a factor:
 
-```{r}
+```{r, echo=TRUE}
 practicetime %>% mutate(ID = factor(ID)) ->
   practicetime
 ```
@@ -126,11 +126,17 @@ plot_it(practicetime, cols = "\\d{1,2}")
 
 ***
 
-From `r figr("RawData")` we can infer that most participants started playing in the second age bracket. There is a trend visible suggesting that mean daily practice time correlates with age. Most subjects were in the second to last age bracket when the study commenced.
+From `r figr("RawData")` we can infer that most participants started playing in the second age bracket. There is a trend visible suggesting that mean daily practice time correlates with age. Most subjects were in the second to last age bracket when the study commenced. Many students seem to have ceased intensive practice during their last age bracket.
 
-This plot has several problems: (a) The lengths of the age brackets are uneven, tricking the onlooker into misjudging a participant's increase (or decrease) of mean daily practice hours over time. (b) Should the research question pertain to the amount of daily hours, then this plot is an adequate illustration of the data. Most of the time the researcher will be interested in practice time dynamics relative to some event---this might be the time of the study or a playing-related injury etc.
+This plot has several problems: (a) The lengths of the age brackets are uneven, tricking the onlooker into misjudging a participant's increase (or decrease) of mean daily practice hours over time. (b) Should the research question pertain to the amount of daily hours during particular age brackets, then this plot is an adequate illustration of the data (but see (c) below). Most of the time the researcher will be interested in practice time dynamics relative to some event---this might be the time of the study or a playing-related injury etc. (c) The seemingly decreasing number of hours during many students last bracket will be dealt with at a later stage (ch. [The Last Age Bracket]).
 
-(a)
+(a) To avoid the apparent isochrony of age brackets, the function `spread_brackets()` comes in handy:
+
+```{r}
+iso_brackets <- spread_brackets(practicetime, cols = "\\d{1,2}")
+```
+
+
 
 (b)
 
@@ -217,6 +223,9 @@ Do this for the data set:
 ## e.g. "^[0-9]{1,2}-[0-9]{1,2}$":
 age_range_idx <- grep("[0-9]{1,2}-[0-9]{1,2}", 
                       names(practicetime))
+## Or, equivalently:
+# age_range_idx <- grep("[0-9]{1,2}-[0-9]{1,2}",
+#                       names(practicetime))
 ## Or provide the column indices explicitly:
 # age_range_idx <- c(4:10) 
 ## The multipliers reflect the duration of each bracket in
@@ -229,7 +238,7 @@ multipliers <- bracket_multipliers(practicetime,
 ```{r, echo=TRUE}
 # bracket hours:
 practicetime_yh <- bracket_hours(practicetime, 
-                                 bracket_idx = age_range_idx, 
+                                 cols = age_range_idx, 
                                  bracket_mult = multipliers)
 
 ```
@@ -273,12 +282,19 @@ ptime_sophist <- mutate(practicetime,
                                                             Date))
 ```
 
+First, we need to find the column index of the last age bracket in each subject:
+
 ```{r, echo=TRUE}
 ## Find last age bracket column for each subject:
-last_bracket_idx <- col_lastentry(ptime_sophist[age_range_idx]) + 
+last_bracket_idx <- col_lastentry(ptime_sophist, 
+                                  cols = age_range_idx) + 
   age_range_idx[1] - 1
 ## Length of each participant's last age bracket:
 durations_last_brackets <- names_to_durations(names(ptime_sophist)[last_bracket_idx])
+```
+
+
+```{r, echo=TRUE}
 ## Because of leap seconds, duration spent in last bracket needs to be 
 ## calculated in secs (achieved by as.duration()) to be unambiguous:
 duration_spent_in_bracket <- as.duration(years(durations_last_brackets) - 

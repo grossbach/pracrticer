@@ -4,13 +4,16 @@
 \alias{col_lastentry}
 \title{Last Column With (Non-NA) Content.}
 \usage{
-col_lastentry(x)
+col_lastentry(x, cols = 1:ncol(x))
 }
 \arguments{
 \item{x}{A data.frame.}
+
+\item{cols}{Either a numerical vector indexing the age bracket columns, or a
+character vector with age bracket column names.}
 }
 \value{
-A vector with column names.
+A vector with age bracket column indices.
 }
 \description{
 Returns the column index of the right-most non-NA entry of each row in a

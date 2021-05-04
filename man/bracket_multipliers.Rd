@@ -4,15 +4,15 @@
 \alias{bracket_multipliers}
 \title{Age Bracket Multiplier.}
 \usage{
-bracket_multipliers(df, bracket_idx = 1:ncol(df), sep = "-")
+bracket_multipliers(x, cols = 1:ncol(x), sep = "-")
 }
 \arguments{
-\item{df}{A data.frame (also) containing the subjective and retrospectively
+\item{x}{A data.frame (also) containing the subjective and retrospectively
 provided practice times of each participant.}
 
-\item{bracket_idx}{A numerical vector indexing the bracket columns. If not
-provided, the entire data.frame is assumed to only contain age bracket
-columns.}
+\item{cols}{Either a numerical vector indexing the bracket columns, or a
+character string with the names of age bracket columns. If not provided,
+the entire data.frame is assumed to only contain age bracket columns.}
 
 \item{sep}{A character string used to separate the beginning and ending ages
 in age bracket column names.}

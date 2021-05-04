@@ -4,22 +4,23 @@
 \alias{plot_it}
 \title{Plot Deliberate Practice Hours Over Age Brackets.}
 \usage{
-plot_it(x, cols = NULL, ID = "ID", Group = NULL, legend = FALSE)
+plot_it(x, cols = 1:ncol(x), ID = "ID", Group = NULL, legend = FALSE)
 }
 \arguments{
 \item{x}{A data.frame with practice hours for each age bracket, one  line per
-subject. See examples.}
+subject.}
 
-\item{cols}{A numerical vector indexing the age bracket columns to use, or a
-regular expression matching the names of the age bracket columns.}
+\item{cols}{Either \code{NULL} (the default), using all columns of x as age
+brackets; or a numerical vector indexing the age bracket columns to use; or
+a regular expression matching the names of the age bracket columns.}
 
 \item{ID}{A vector of size \code{nrow(x)} with unique subject IDs.}
 
 \item{Group}{A grouping vector of size \code{nrow(x)}.}
 
-\item{legend}{Logical. When \code{FALSE} (default) or \code{"none"}, no legend
-is shown. All possible values for \code{ggplot2::theme(legend.position)}
-are allowed.}
+\item{legend}{Logical. When \code{FALSE} (default) or \code{"none"}, no
+legend is shown. All possible values for
+\code{ggplot2::theme(legend.position)} are allowed.}
 }
 \description{
 Plot Deliberate Practice Hours Over Age Brackets.
