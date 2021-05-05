@@ -4,18 +4,19 @@ The R package praktikr contains functions to ease handling of subjective, and of
 To install praktikr, issue the following commands at the R prompt:
 
 
-`if (!require("remotes")) {`
-
-`  install.packages("remotes")`
-
-`}`
-
-`remotes::install_github("grossbach/praktikr")`
+```r
+if (!require("remotes")) {
+  install.packages("remotes")
+}
+remotes::install_github("grossbach/praktikr")
+```
 
 
 praktikr's vignette has more information on how to use the package:
 
-`vignette(praktikr)`
+```r
+vignette(praktikr)
+```
 
 
 
