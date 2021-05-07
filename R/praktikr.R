@@ -168,38 +168,18 @@ bracket_hours <- function(x, cols = 1:ncol(x), bracket_mult = NULL, append = TRU
 }
 #' Convert Column Names to Age Bracket Durations.
 #'
-#' @param col_names A character vector of age brackets.
-#' @param sep A character used to separate the lower and upper bound of the
+#' @param col_names A character vector with the names of those columns of a
+#'   data.frame containing age bracket averages.
+#' @param sep A character used to separate the lower and the upper bound of the
 #'   bracket ranges.
 #'
 #' @return A numerical vector with age bracket durations (usually in years).
 #' @export
 #'
 #' @examples
-#' d_f <- data.frame(Names = c("Carl", "Blue", "Perkins"),
-#'                   `10-12` = c(1.5, 1.0, 0.75),
-#'                   `13-14` = c(3, 0.75, 1.0),
-#'                   check.names = FALSE)
-#' names_to_durations(d_f, "^\\d{2}-\\d{2}", sep = "-")
-#' names_to_durations(d_f, names(d_f)[2:3])
-#' names_to_durations(d_f, 2:3)
-names_to_durations <- function(x, cols = 1:ncol(x), sep = "-") {
-  if (is.character(cols)) {
-    ## Does it contain col names or a regexp?
-    col_names <- names(x)[match(cols, names(x))]
-    if (all(is.na(col_names))) {
-      ## it's a regexp!
-      if (length(cols) == 1)
-        col_names <- grep(cols, names(x), value = TRUE)
-      if (length(col_names) == 0)
-        stop("No matches of cols in names(x)")
-    } else if (any(is.na(col_names)))
-      stop("Not all column names provide are existing.")
-  } else if (is.numeric(cols)) {
-    col_names <- names(x)[cols]
-  }
-  if (any(is.na(col_names)))
-    stop("Some column names were NA.")
+#' var_names <- c("10-12", "13-14")
+#' names_to_durations(var_names, sep = "-")
+names_to_durations <- function(col_names, sep = "-") {
   n_cols <- length(col_names)
   duration <- vector(mode = "integer", length = n_cols)
   for (n in 1:length(col_names)) {
@@ -254,11 +234,24 @@ plot_it <- function(x, cols = 1:ncol(x), ID = "ID", Group = NULL, legend = FALSE
     ggplot2::geom_line(na.rm = TRUE) +
     ggplot2::theme(legend.position = lg)
 }
+extend_bracket <- function(x, y) {
+
+  names(x) <- y
+}
+#' Spread Brackets.
+#'
+#' @param x
+#' @param cols
+#'
+#' @return
+#' @export
+#'
+#' @examples
 spread_brackets <- function(x, cols = 1:ncol(x)) {
   if (is.character(cols)) {
     if (length(cols) == 1) {
-      col_names <- match(cols, names(x)) # ONE col name was provided
-      if (is.na(col_names)) # was is a regexp?
+      col_names <- match(cols, names(x)) # Either ONE col name was provided...
+      if (is.na(col_names)) # ... or was it a regexp?
         col_names <- grep(cols, names(x), perl = TRUE, value = TRUE)
       if (any(is.na(col_names)))
         stop("No matching column names found.")
@@ -267,7 +260,12 @@ spread_brackets <- function(x, cols = 1:ncol(x)) {
   } else if (is.numeric(cols)) {
     col_names <- names(x)[cols]
   }
-  bracket_durations <- names_to_durations() # do we need this?
+  col_idx <- match(col_names, names(x))
+  brackets <- x[col_idx]
+  df <- cbind(x[-col_idx],
+                sapply(brackets,
+                       FUN = extend_bracket(x),
+                       y = colnames(x)))
 }
 #' Convert Column Names to Column Indices.
 #'

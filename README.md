@@ -15,7 +15,7 @@ remotes::install_github("grossbach/praktikr")
 praktikr's vignette has more information on how to use the package:
 
 ```r
-vignette(praktikr)
+vignette("praktikr")
 ```
 
 

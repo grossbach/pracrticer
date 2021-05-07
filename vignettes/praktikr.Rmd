@@ -5,7 +5,7 @@ date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteEncoding{UTF-8}
-  %\VignetteIndexEntry{praktikr: Cumulative Practice Time in Domain Experts}
+  %\VignetteIndexEntry{praktikr}
   %\VignetteEngine{knitr::rmarkdown}
 bibliography: /home/grossbach/files/_sonstiges/000literaturdb.bib
 csl: /home/grossbach/files/_sonstiges/frontiers-in-neuroscience.csl  
