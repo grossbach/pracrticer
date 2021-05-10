@@ -82,8 +82,10 @@ days_since_bday <- function(dob, today = Sys.Date()) {
 #' d_f <- data.frame(`10-12` = c(1.5, 1.0, 0.75), `13-14` = c(3, 0.75, 1.0), check.names = FALSE)
 #' bracket_multipliers(d_f)
 bracket_multipliers <- function(x, cols = 1:ncol(x), sep = "-") {
-  bracket_colnames <- bracket_colnames_(x, cols)
-  cols <- col_names_to_indices_(x, bracket_colnames)
+  if (is.character(cols)) {
+    bracket_colnames <- bracket_colnames_(x, cols)
+    cols <- col_names_to_indices_(x, bracket_colnames)
+  }
   nrow_df <- nrow(x)
   ddf <- as.data.frame(matrix(NA,
                               nrow = nrow_df,
@@ -116,8 +118,10 @@ bracket_multipliers <- function(x, cols = 1:ncol(x), sep = "-") {
 #' d_f <- data.frame(a = c("a", "b", NA), b = c(1, NA, 3))
 #' col_lastentry(d_f)
 col_lastentry = function(x, cols = 1:ncol(x)) {
-  bracket_colnames <- bracket_colnames_(x, cols)
-  cols <- col_names_to_indices_(x, bracket_colnames)
+  if (is.character(cols)) {
+    bracket_colnames <- bracket_colnames_(x, cols)
+    cols <- col_names_to_indices_(x, bracket_colnames)
+  }
   idx = ifelse(is.na(x[cols]),
                0L,
                col(x))
@@ -211,7 +215,10 @@ names_to_durations <- function(col_names, sep = "-") {
 #' @examples
 #'
 plot_it <- function(x, cols = 1:ncol(x), ID = "ID", Group = NULL, legend = FALSE) {
-  cols <- bracket_colnames_(x, cols)
+  if (is.character(cols)) {
+    bracket_colnames <- bracket_colnames_(x, cols)
+    cols <- col_names_to_indices_(x, bracket_colnames)
+  }
   x_lng <- tidyr::pivot_longer(x,
                                cols = cols,
                                names_to = "Age",
@@ -234,10 +241,6 @@ plot_it <- function(x, cols = 1:ncol(x), ID = "ID", Group = NULL, legend = FALSE
     ggplot2::geom_line(na.rm = TRUE) +
     ggplot2::theme(legend.position = lg)
 }
-extend_bracket <- function(x, y) {
-
-  names(x) <- y
-}
 #' Spread Brackets.
 #'
 #' @param x
@@ -248,6 +251,10 @@ extend_bracket <- function(x, y) {
 #'
 #' @examples
 spread_brackets <- function(x, cols = 1:ncol(x)) {
+  if (is.character(cols)) {
+    bracket_colnames <- bracket_colnames_(x, cols)
+    cols <- col_names_to_indices_(x, bracket_colnames)
+  }
   df <- x
   bracket_colnames <- bracket_colnames_(x, cols)
   brackets <- x[bracket_colnames]
