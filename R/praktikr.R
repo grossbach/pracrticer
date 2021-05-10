@@ -82,8 +82,8 @@ days_since_bday <- function(dob, today = Sys.Date()) {
 #' d_f <- data.frame(`10-12` = c(1.5, 1.0, 0.75), `13-14` = c(3, 0.75, 1.0), check.names = FALSE)
 #' bracket_multipliers(d_f)
 bracket_multipliers <- function(x, cols = 1:ncol(x), sep = "-") {
-  if (is.character(cols))
-    cols <- col_names_to_indices(x, cols)
+  bracket_colnames <- bracket_colnames_(x, cols)
+  cols <- col_names_to_indices_(x, bracket_colnames)
   nrow_df <- nrow(x)
   ddf <- as.data.frame(matrix(NA,
                               nrow = nrow_df,
@@ -116,14 +116,14 @@ bracket_multipliers <- function(x, cols = 1:ncol(x), sep = "-") {
 #' d_f <- data.frame(a = c("a", "b", NA), b = c(1, NA, 3))
 #' col_lastentry(d_f)
 col_lastentry = function(x, cols = 1:ncol(x)) {
-  if (is.character(cols)) {
-    cols <- col_names_to_indices(x, col)
-  }
-  idx = ifelse(is.na(x),
+  bracket_colnames <- bracket_colnames_(x, cols)
+  cols <- col_names_to_indices_(x, bracket_colnames)
+  idx = ifelse(is.na(x[cols]),
                0L,
                col(x))
   lastentries <- apply(idx, 1, max)
   names(lastentries) <- NULL
+  lastentries <- lastentries + min(cols) - 1 # add offset
   return(lastentries)
 }
 #' Bracket Hours.
@@ -153,8 +153,10 @@ col_lastentry = function(x, cols = 1:ncol(x)) {
 #' index <- c(2, 3)
 #' bracket_hours(d_f, index, c(3, 2))
 bracket_hours <- function(x, cols = 1:ncol(x), bracket_mult = NULL, append = TRUE) {
-  if (is.character(cols))
-      cols <- col_names_to_indices(x, cols)
+  if (is.character(cols)) {
+    bracket_colnames <- bracket_colnames_(x, cols)
+    cols <- col_names_to_indices_(x, bracket_colnames)
+  }
   bracket_hours <- x[ , cols] * bracket_mult * 365.25
   names(bracket_hours) <- paste("Hours",
                                 names(x[cols]),
@@ -209,18 +211,16 @@ names_to_durations <- function(col_names, sep = "-") {
 #' @examples
 #'
 plot_it <- function(x, cols = 1:ncol(x), ID = "ID", Group = NULL, legend = FALSE) {
-  if (is.character(cols)) {
-    cols <- col_names_to_indices(x, cols)
-  }
+  cols <- bracket_colnames_(x, cols)
   x_lng <- tidyr::pivot_longer(x,
                                cols = cols,
-                               names_to = "AgeBracket",
+                               names_to = "Age",
                                values_to = "PracticeHours")
   x_lng <- dplyr::mutate(x_lng,
-                         AgeBracket = factor(AgeBracket,
-                                             ordered = TRUE,
-                                             levels = unique(AgeBracket),
-                                             labels = unique(AgeBracket)))
+                         Age = factor(Age,
+                                      ordered = TRUE,
+                                      levels = unique(Age),
+                                      labels = unique(Age)))
   lg <- if(is.logical(legend)) {
     ifelse(!isTRUE(legend),
            "none",
@@ -228,7 +228,7 @@ plot_it <- function(x, cols = 1:ncol(x), ID = "ID", Group = NULL, legend = FALSE
   } else if(is.character(legend)) {
     lg <- legend
   }
-  ggplot2::ggplot(x_lng, ggplot2::aes(AgeBracket, PracticeHours,
+  ggplot2::ggplot(x_lng, ggplot2::aes(Age, PracticeHours,
                                       color = ID, group = ID)) +
     ggplot2::geom_point(na.rm = TRUE) +
     ggplot2::geom_line(na.rm = TRUE) +
@@ -248,47 +248,26 @@ extend_bracket <- function(x, y) {
 #'
 #' @examples
 spread_brackets <- function(x, cols = 1:ncol(x)) {
-  if (is.character(cols)) {
-    if (length(cols) == 1) {
-      col_names <- match(cols, names(x)) # Either ONE col name was provided...
-      if (is.na(col_names)) # ... or was it a regexp?
-        col_names <- grep(cols, names(x), perl = TRUE, value = TRUE)
-      if (any(is.na(col_names)))
-        stop("No matching column names found.")
+  df <- x
+  bracket_colnames <- bracket_colnames_(x, cols)
+  brackets <- x[bracket_colnames]
+  df2 <- data.frame(dump = rep(NA, nrow(df)))
+  for (col in bracket_colnames) {
+    bounds <- strsplit(names(brackets[col]), "-")
+    lb <- as.numeric(bounds[[1]][1])
+    ub <- as.numeric(bounds[[1]][2])
+    new_cols <- paste(lb:ub)
+    col_data <- dplyr::pull(brackets, col)
+    attr(col_data, "names") <- NULL
+    df2 <- data.frame(matrix(col_data,
+                             nrow = length(col_data),
+                             ncol = length(new_cols)))
+    if (any(grepl("dump", names(df2)))) {
+      df2$dump <- NULL
     }
-    # col_idx <- col_names_to_indices(x, cols) # do we need this?
-  } else if (is.numeric(cols)) {
-    col_names <- names(x)[cols]
+    names(df2) <- new_cols
+    df[col] <- NULL
+    df <- cbind(df, df2)
   }
-  col_idx <- match(col_names, names(x))
-  brackets <- x[col_idx]
-  df <- cbind(x[-col_idx],
-                sapply(brackets,
-                       FUN = extend_bracket(x),
-                       y = colnames(x)))
-}
-#' Convert Column Names to Column Indices.
-#'
-#' @param x A data.frame with practice hours for each age bracket, one  line per
-#'   subject.
-#' @param cols Either \code{NULL} (the default), using all columns of x as age
-#'   brackets; or a numerical vector indexing the age bracket columns to use; or
-#'   a regular expression matching the names of the age bracket columns.
-#'
-#' @return A vector with indices.
-#' @export
-#'
-#' @examples
-col_names_to_indices <- function(x, cols) {
-  stopifnot(is.data.frame(x),
-            is.character(cols))
-  names_x <- names(x)
-  val <- match(cols, names_x)
-  if (length(val == 0)) {
-    ## Maybe cols is a regexp?
-    val <- grep(cols, names_x, perl = TRUE)
-    if (length(val) == 0)
-      stop("Column names not found in x")
-  }
-  return(val)
+  return(df)
 }

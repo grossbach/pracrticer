@@ -36,7 +36,8 @@ theme_set(theme_light(base_size = 10))
 knit_hooks$set(anchor = hook_anchor)
 opts_knit$set(kfigr.link = TRUE,
               kfigr.prefix = TRUE)
-options(knitr.kable.NA = "")
+options(knitr.kable.NA = "",
+        rmarkdown.html_vignette.check_title = FALSE)
 ## Constants:
 FIGREF <- "Fig." # type for pics and plots, figr()
 TABREF <- "Tab." # type for tables, figr()
@@ -122,7 +123,7 @@ To plot the amount of mean daily hours spent at the instrument for each age brac
 plot_it(practicetime, cols = "\\d{1,2}")
 ```
 
-`r figr("RawData", type = FIGREF)`. *Mean daily deliberate practice hours plotted against age brackets. Each line represents one participant and connects the retrospectively collected mean daily hours at the instrument of different age brackets.*
+`r figr("RawData", type = FIGREF)`. *Mean daily deliberate practice hours plotted against age brackets. Each line represents one participant and connects the retrospectively collected mean daily hours per age bracket at the instrument.*
 
 ***
 
@@ -132,11 +133,17 @@ This plot has several problems: (a) The lengths of the age brackets are uneven, 
 
 (a) To avoid the apparent isochrony of age brackets, the function `spread_brackets()` comes in handy:
 
-```{r}
+```{r MakeBracketIsochronous, anchor=SRCREF}
 iso_brackets <- spread_brackets(practicetime, cols = "\\d{1,2}")
 ```
 
+```{r PlotIsoBrackets, anchor=FIGREF}
+plot_it(iso_brackets, cols = paste(0:30), ID = "ID")
+```
 
+`r figr("PlotIsoBrackets", type = FIGREF)`. *The same data as in `r figr("RawData")`, but plotted against age in years, so that bracket duration becomes visible.*
+
+***
 
 (b)
 
@@ -237,29 +244,34 @@ multipliers <- bracket_multipliers(practicetime,
 
 ```{r, echo=TRUE}
 # bracket hours:
-practicetime_yh <- bracket_hours(practicetime, 
-                                 cols = age_range_idx, 
-                                 bracket_mult = multipliers)
-
+practicetime_brackethours <- bracket_hours(practicetime, 
+                                           cols = age_range_idx, 
+                                           bracket_mult = multipliers)
 ```
 
 ```{r}
 old_opt <- options(knitr.kable.NA = "-")
-kable(rbind(head(practicetime_yh),
-            tail(practicetime_yh)), row.names = FALSE)
+kable(rbind(head(practicetime_brackethours),
+            tail(practicetime_brackethours)), 
+      row.names = FALSE)
 options(knitr.kable.NA = old_opt)
 ```
 
 ```{r}
-pt_yh_summary <- pivot_longer(practicetime_yh, 
+pt_bh_summary <- pivot_longer(practicetime_brackethours, 
                               cols = starts_with("Hours_"), 
                               names_to = "Bracket", 
-                              values_to = "Mean_hours_per_year")
-ggplot(pt_yh_summary, aes(Bracket, Mean_hours_per_year, 
+                              values_to = "Hours_per_bracket")
+pt_bh_summary <- mutate(pt_bh_summary,
+                        Bracket = factor(Bracket,
+                                         ordered = TRUE,
+                                         levels = unique(Bracket),
+                                         labels = unique(Bracket)))
+ggplot(pt_bh_summary, aes(Bracket, Hours_per_bracket, 
                           group = ID, 
                           color = ID)) +
-  geom_point() +
-  geom_line() +
+  geom_point(na.rm = TRUE) +
+  geom_line(na.rm = TRUE) +
   theme(legend.position = "none")
 ```
 
@@ -287,8 +299,7 @@ First, we need to find the column index of the last age bracket in each subject:
 ```{r, echo=TRUE}
 ## Find last age bracket column for each subject:
 last_bracket_idx <- col_lastentry(ptime_sophist, 
-                                  cols = age_range_idx) + 
-  age_range_idx[1] - 1
+                                  cols = "\\d{1,2}-\\d{1,2}")
 ## Length of each participant's last age bracket:
 durations_last_brackets <- names_to_durations(names(ptime_sophist)[last_bracket_idx])
 ```
@@ -296,7 +307,7 @@ durations_last_brackets <- names_to_durations(names(ptime_sophist)[last_bracket_
 
 ```{r, echo=TRUE}
 ## Because of leap seconds, duration spent in last bracket needs to be 
-## calculated in secs (achieved by as.duration()) to be unambiguous:
+## calculated in secs (achieved by lubridate::as.duration()) to be unambiguous:
 duration_spent_in_bracket <- as.duration(years(durations_last_brackets) - 
                                            ptime_sophist$DaysSinceLastBday)
 as.numeric(duration_spent_in_bracket, "years")

@@ -4,13 +4,14 @@
 \alias{names_to_durations}
 \title{Convert Column Names to Age Bracket Durations.}
 \usage{
-names_to_durations(x, cols = 1:ncol(x), sep = "-")
+names_to_durations(col_names, sep = "-")
 }
 \arguments{
-\item{sep}{A character used to separate the lower and upper bound of the
-bracket ranges.}
+\item{col_names}{A character vector with the names of those columns of a
+data.frame containing age bracket averages.}
 
-\item{col_names}{A character vector of age brackets.}
+\item{sep}{A character used to separate the lower and the upper bound of the
+bracket ranges.}
 }
 \value{
 A numerical vector with age bracket durations (usually in years).
@@ -19,11 +20,6 @@ A numerical vector with age bracket durations (usually in years).
 Convert Column Names to Age Bracket Durations.
 }
 \examples{
-d_f <- data.frame(Names = c("Carl", "Blue", "Perkins"),
-                  `10-12` = c(1.5, 1.0, 0.75),
-                  `13-14` = c(3, 0.75, 1.0),
-                  check.names = FALSE)
-names_to_durations(d_f, "^\\\\d{2}-\\\\d{2}", sep = "-")
-names_to_durations(d_f, names(d_f)[2:3])
-names_to_durations(d_f, 2:3)
+var_names <- c("10-12", "13-14")
+names_to_durations(var_names, sep = "-")
 }
