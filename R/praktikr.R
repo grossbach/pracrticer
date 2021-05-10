@@ -79,7 +79,9 @@ days_since_bday <- function(dob, today = Sys.Date()) {
 #' @export
 #'
 #' @examples
-#' d_f <- data.frame(`10-12` = c(1.5, 1.0, 0.75), `13-14` = c(3, 0.75, 1.0), check.names = FALSE)
+#' d_f <- data.frame(`10-12` = c(1.5, 1.0, 0.75),
+#'                   `13-14` = c(3, 0.75, 1.0),
+#'                   check.names = FALSE)
 #' bracket_multipliers(d_f)
 bracket_multipliers <- function(x, cols = 1:ncol(x), sep = "-") {
   if (is.character(cols)) {
@@ -132,7 +134,7 @@ col_lastentry = function(x, cols = 1:ncol(x)) {
 }
 #' Bracket Hours.
 #'
-#' Calculates the hours subjects have been practice during age brackets.
+#' Calculates the hours subjects have been practicing during age brackets.
 #'
 #' @param x A data.frame (also) containing the subjective and retrospectively
 #'   provided practice times of each participant.
@@ -153,9 +155,12 @@ col_lastentry = function(x, cols = 1:ncol(x)) {
 #' @export
 #'
 #' @examples
-#' d_f <- data.frame(ID = c(1, 2), `10-12` = c(1.5, 1.0), `13-14` = c(3, 0.75), check.names = FALSE)
-#' index <- c(2, 3)
-#' bracket_hours(d_f, index, c(3, 2))
+#' d_f <- data.frame(ID = c(1, 2),
+#'                   `10-12` = c(1.5, 1.0),
+#'                   `13-14` = c(3, 0.75),
+#'                   check.names = FALSE)
+#' bracket_duration <- c(3, 2)
+#' bracket_hours(d_f, "\\d{2}-\\d{2}", bracket_duration)
 bracket_hours <- function(x, cols = 1:ncol(x), bracket_mult = NULL, append = TRUE) {
   if (is.character(cols)) {
     bracket_colnames <- bracket_colnames_(x, cols)
@@ -201,9 +206,10 @@ names_to_durations <- function(col_names, sep = "-") {
 #'
 #' @param x A data.frame with practice hours for each age bracket, one  line per
 #'   subject.
-#' @param cols Either \code{NULL} (the default), using all columns of x as age
-#'   brackets; or a numerical vector indexing the age bracket columns to use; or
-#'   a regular expression matching the names of the age bracket columns.
+#' @param cols Either a numerical vector indexing the age bracket columns to
+#'   use, or a regular expression matching the names of the age bracket columns,
+#'   or a character vector with the bracket column names. If not provided, all
+#'   columns of \code{x} are treated as containing age bracket information.
 #' @param ID A vector of size \code{nrow(x)} with unique subject IDs.
 #' @param Group A grouping vector of size \code{nrow(x)}.
 #' @param legend Logical. When \code{FALSE} (default) or \code{"none"}, no
@@ -213,7 +219,12 @@ names_to_durations <- function(col_names, sep = "-") {
 #' @export
 #'
 #' @examples
-#'
+#' d_f <- data.frame(ID = LETTERS[1:3],
+#'                   `10-12` = c(1.5, 1.0, 0.75),
+#'                   `13-14` = c(3, 0.75, 1.0),
+#'                   check.names = FALSE)
+#' plot_it(d_f, "\\d{2}-\\d{2}")
+
 plot_it <- function(x, cols = 1:ncol(x), ID = "ID", Group = NULL, legend = FALSE) {
   if (is.character(cols)) {
     bracket_colnames <- bracket_colnames_(x, cols)
@@ -243,13 +254,23 @@ plot_it <- function(x, cols = 1:ncol(x), ID = "ID", Group = NULL, legend = FALSE
 }
 #' Spread Brackets.
 #'
-#' @param x
-#' @param cols
+#' @param x A data.frame with practice hours for each age bracket, one  line per
+#'   subject.
+#' @param cols Either a numerical vector indexing the age bracket columns to
+#'   use, or a regular expression matching the names of the age bracket columns,
+#'   or a character vector with the bracket column names. If not provided, all
+#'   columns of \code{x} are treated as containing age bracket information.
 #'
-#' @return
+#' @return The \code{data.frame x}, but with the columns of each age bracket
+#'   repeated as often as the duration of the corresponding age bracket. The
+#'   original age bracket columns are being removed.
 #' @export
 #'
 #' @examples
+#' d_f <- data.frame(`10-12` = c(1.5, 1.0, 0.75),
+#'                   `13-14` = c(3, 0.75, 1.0),
+#'                   check.names = FALSE)
+#' spread_brackets(d_f, "\\d{1,2}-\\d{1,2}")
 spread_brackets <- function(x, cols = 1:ncol(x)) {
   if (is.character(cols)) {
     bracket_colnames <- bracket_colnames_(x, cols)

@@ -10,9 +10,10 @@ plot_it(x, cols = 1:ncol(x), ID = "ID", Group = NULL, legend = FALSE)
 \item{x}{A data.frame with practice hours for each age bracket, one  line per
 subject.}
 
-\item{cols}{Either \code{NULL} (the default), using all columns of x as age
-brackets; or a numerical vector indexing the age bracket columns to use; or
-a regular expression matching the names of the age bracket columns.}
+\item{cols}{Either a numerical vector indexing the age bracket columns to
+use, or a regular expression matching the names of the age bracket columns,
+or a character vector with the bracket column names. If not provided, all
+columns of \code{x} are treated as containing age bracket information.}
 
 \item{ID}{A vector of size \code{nrow(x)} with unique subject IDs.}
 
@@ -26,5 +27,9 @@ legend is shown. All possible values for
 Plot Deliberate Practice Hours Over Age Brackets.
 }
 \examples{
-
+d_f <- data.frame(ID = LETTERS[1:3],
+                  `10-12` = c(1.5, 1.0, 0.75),
+                  `13-14` = c(3, 0.75, 1.0),
+                  check.names = FALSE)
+plot_it(d_f, "\\\\d{2}-\\\\d{2}")
 }

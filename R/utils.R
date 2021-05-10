@@ -6,11 +6,10 @@
 #'   brackets; or a numerical vector indexing the age bracket columns to use; or
 #'   a regular expression matching the names of the age bracket columns.
 #'
-#' @NoRd
+#' @noRd
 #'
-#' @return A vector with indices.
-#'
-#' @examples
+#' @return A vector with the indices of the column names \code{cols} of
+#'   \code{x}.
 col_names_to_indices_ <- function(x, cols) {
   stopifnot(is.data.frame(x),
             is.character(cols))
@@ -26,13 +25,13 @@ col_names_to_indices_ <- function(x, cols) {
 }
 #' Column Names Of Age Brackets.
 #'
-#' @param x
-#' @param cols
+#' @param x A data.frame (also) containing the subjective and retrospectively
+#'   provided practice times of each participant.
+#' @param cols A numerical vector of column indices of \code{x}.
 #'
-#' @NoRd
-#' @return
+#' @noRd
 #'
-#' @examples
+#' @return A character vector of column names of \code{x}.
 bracket_colnames_ <- function(x, cols) {
   if (is.character(cols)) {
     if (length(cols) == 1) {

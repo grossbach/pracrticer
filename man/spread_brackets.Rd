@@ -7,11 +7,25 @@
 spread_brackets(x, cols = 1:ncol(x))
 }
 \arguments{
-\item{cols}{}
+\item{x}{A data.frame with practice hours for each age bracket, one  line per
+subject.}
+
+\item{cols}{Either a numerical vector indexing the age bracket columns to
+use, or a regular expression matching the names of the age bracket columns,
+or a character vector with the bracket column names. If not provided, all
+columns of \code{x} are treated as containing age bracket information.}
 }
 \value{
-
+The \code{data.frame x}, but with the columns of each age bracket
+repeated as often as the duration of the corresponding age bracket. The
+original age bracket columns are being removed.
 }
 \description{
 Spread Brackets.
+}
+\examples{
+d_f <- data.frame(`10-12` = c(1.5, 1.0, 0.75),
+                  `13-14` = c(3, 0.75, 1.0),
+                  check.names = FALSE)
+spread_brackets(d_f, "\\\\d{1,2}-\\\\d{1,2}")
 }

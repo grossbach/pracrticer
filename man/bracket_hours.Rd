@@ -29,10 +29,13 @@ If \code{append = TRUE} a data.frame of size \code{nrow(x) x (ncol(x)
 \code{nrow(x) x length(bracket_idx)}.
 }
 \description{
-Calculates the hours subjects have been practice during age brackets.
+Calculates the hours subjects have been practicing during age brackets.
 }
 \examples{
-d_f <- data.frame(ID = c(1, 2), `10-12` = c(1.5, 1.0), `13-14` = c(3, 0.75), check.names = FALSE)
-index <- c(2, 3)
-bracket_hours(d_f, index, c(3, 2))
+d_f <- data.frame(ID = c(1, 2),
+                  `10-12` = c(1.5, 1.0),
+                  `13-14` = c(3, 0.75),
+                  check.names = FALSE)
+bracket_duration <- c(3, 2)
+bracket_hours(d_f, "\\\\d{2}-\\\\d{2}", bracket_duration)
 }

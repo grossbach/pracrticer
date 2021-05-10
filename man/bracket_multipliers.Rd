@@ -25,6 +25,8 @@ indices of the right-most non-NA entry in each row of \code{df}.
 Age Bracket Multiplier.
 }
 \examples{
-d_f <- data.frame(`10-12` = c(1.5, 1.0, 0.75), `13-14` = c(3, 0.75, 1.0), check.names = FALSE)
+d_f <- data.frame(`10-12` = c(1.5, 1.0, 0.75),
+                  `13-14` = c(3, 0.75, 1.0),
+                  check.names = FALSE)
 bracket_multipliers(d_f)
 }
