@@ -4,7 +4,7 @@
 \alias{spread_brackets}
 \title{Spread Brackets.}
 \usage{
-spread_brackets(x, cols = 1:ncol(x))
+spread_brackets(x, cols = 1:ncol(x), prefix = "", postfix = "")
 }
 \arguments{
 \item{x}{A data.frame with practice hours for each age bracket, one  line per
@@ -14,6 +14,10 @@ subject.}
 use, or a regular expression matching the names of the age bracket columns,
 or a character vector with the bracket column names. If not provided, all
 columns of \code{x} are treated as containing age bracket information.}
+
+\item{prefix}{A character to be prefixed to new column names.}
+
+\item{postfix}{A character to be appended to new column names.}
 }
 \value{
 The \code{data.frame x}, but with the columns of each age bracket
@@ -28,4 +32,7 @@ d_f <- data.frame(`10-12` = c(1.5, 1.0, 0.75),
                   `13-14` = c(3, 0.75, 1.0),
                   check.names = FALSE)
 spread_brackets(d_f, "\\\\d{1,2}-\\\\d{1,2}")
+spread_brackets(d_f, prefix = "age")
+spread_brackets(d_f, postfix = "yrs")
+
 }

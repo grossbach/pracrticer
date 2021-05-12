@@ -265,6 +265,8 @@ plot_it <- function(x, cols = 1:ncol(x), ID = "ID", Group = NULL, legend = FALSE
 #'   use, or a regular expression matching the names of the age bracket columns,
 #'   or a character vector with the bracket column names. If not provided, all
 #'   columns of \code{x} are treated as containing age bracket information.
+#' @param prefix A character to be prefixed to new column names.
+#' @param postfix A character to be appended to new column names.
 #'
 #' @return The \code{data.frame x}, but with the columns of each age bracket
 #'   repeated as often as the duration of the corresponding age bracket. The
@@ -276,7 +278,10 @@ plot_it <- function(x, cols = 1:ncol(x), ID = "ID", Group = NULL, legend = FALSE
 #'                   `13-14` = c(3, 0.75, 1.0),
 #'                   check.names = FALSE)
 #' spread_brackets(d_f, "\\d{1,2}-\\d{1,2}")
-spread_brackets <- function(x, cols = 1:ncol(x)) {
+#' spread_brackets(d_f, prefix = "age")
+#' spread_brackets(d_f, postfix = "yrs")
+#'
+spread_brackets <- function(x, cols = 1:ncol(x), prefix = "", postfix = "") {
   if (is.character(cols)) {
     bracket_colnames <- bracket_colnames_(x, cols)
     cols <- col_names_to_indices_(x, bracket_colnames)
@@ -289,7 +294,7 @@ spread_brackets <- function(x, cols = 1:ncol(x)) {
     bounds <- strsplit(names(brackets[col]), "-")
     lb <- as.numeric(bounds[[1]][1])
     ub <- as.numeric(bounds[[1]][2])
-    new_cols <- paste(lb:ub)
+    new_cols <- paste0(prefix, lb:ub, postfix)
     col_data <- dplyr::pull(brackets, col)
     attr(col_data, "names") <- NULL
     df2 <- data.frame(matrix(col_data,
