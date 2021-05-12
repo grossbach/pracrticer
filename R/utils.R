@@ -46,7 +46,7 @@ bracket_colnames_ <- function(x, cols) {
                           value = TRUE)
     } else {
       # ... or column names were passed explicitly...
-      col_names <- match(cols, names(x))
+      col_names <- names(x)[match(cols, names(x))]
     }
   } else if (is.numeric(cols)) {
     col_names <- names(x)[cols]
