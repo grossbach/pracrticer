@@ -204,8 +204,8 @@ names_to_durations <- function(col_names, sep = "-") {
 }
 #' Plot Deliberate Practice Hours Over Age Brackets.
 #'
-#' @param x A data.frame with practice hours for each age bracket, one  line per
-#'   subject.
+#' @param x A data.frame with practice hours for each age bracket, one line per
+#'   subject (wide format).
 #' @param cols Either a numerical vector indexing the age bracket columns to
 #'   use, or a regular expression matching the names of the age bracket columns,
 #'   or a character vector with the bracket column names. If not provided, all
@@ -223,7 +223,11 @@ names_to_durations <- function(col_names, sep = "-") {
 #'                   `10-12` = c(1.5, 1.0, 0.75),
 #'                   `13-14` = c(3, 0.75, 1.0),
 #'                   check.names = FALSE)
+#' ## Equivalent calls:
 #' plot_it(d_f, "\\d{2}-\\d{2}")
+#' plot_it(d_f, c("10-12", "13-14"))
+#' plot_it(d_f, c(2, 3))
+#' plot_it(d_f[ , 2:3])
 
 plot_it <- function(x, cols = 1:ncol(x), ID = "ID", Group = NULL, legend = FALSE) {
   if (is.character(cols)) {
@@ -247,7 +251,8 @@ plot_it <- function(x, cols = 1:ncol(x), ID = "ID", Group = NULL, legend = FALSE
     lg <- legend
   }
   ggplot2::ggplot(x_lng, ggplot2::aes(Age, PracticeHours,
-                                      color = ID, group = ID)) +
+                                      color = ID,
+                                      group = ID)) +
     ggplot2::geom_point(na.rm = TRUE) +
     ggplot2::geom_line(na.rm = TRUE) +
     ggplot2::theme(legend.position = lg)

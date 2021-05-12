@@ -7,8 +7,8 @@
 plot_it(x, cols = 1:ncol(x), ID = "ID", Group = NULL, legend = FALSE)
 }
 \arguments{
-\item{x}{A data.frame with practice hours for each age bracket, one  line per
-subject.}
+\item{x}{A data.frame with practice hours for each age bracket, one line per
+subject (wide format).}
 
 \item{cols}{Either a numerical vector indexing the age bracket columns to
 use, or a regular expression matching the names of the age bracket columns,
@@ -31,5 +31,9 @@ d_f <- data.frame(ID = LETTERS[1:3],
                   `10-12` = c(1.5, 1.0, 0.75),
                   `13-14` = c(3, 0.75, 1.0),
                   check.names = FALSE)
+## Equivalent calls:
 plot_it(d_f, "\\\\d{2}-\\\\d{2}")
+plot_it(d_f, c("10-12", "13-14"))
+plot_it(d_f, c(2, 3))
+plot_it(d_f[ , 2:3])
 }
