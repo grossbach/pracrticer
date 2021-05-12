@@ -1,4 +1,4 @@
-#' Days Lived Since Date-of-birth.
+#' Days Lived Since Date Of Birth.
 #'
 #' Calculate age in days from date of birth and, e.g. today's date, to day
 #' precision.
@@ -243,6 +243,7 @@ plot_it <- function(x, cols = 1:ncol(x), ID = "ID", Group = NULL, legend = FALSE
                                       ordered = TRUE,
                                       levels = unique(Age),
                                       labels = unique(Age)))
+  ## show legend?
   lg <- if(is.logical(legend)) {
     ifelse(!isTRUE(legend),
            "none",
@@ -250,12 +251,22 @@ plot_it <- function(x, cols = 1:ncol(x), ID = "ID", Group = NULL, legend = FALSE
   } else if(is.character(legend)) {
     lg <- legend
   }
+  ## how many x axis labels?
+  n_levels <- nlevels(x_lng$Age)
+  if (n_levels <= 10) {
+    breaks <- levels(x_lng$Age)
+  } else if (n_levels > 10 & n_levels <= 75) {
+    breaks <- paste(round(1:n_levels / 5) * 5)
+  } else if (n_levels > 75) {
+    breaks <- paste(round(1:n_levels / 10) * 10)
+  }
   ggplot2::ggplot(x_lng, ggplot2::aes(Age, PracticeHours,
                                       color = ID,
                                       group = ID)) +
     ggplot2::geom_point(na.rm = TRUE) +
     ggplot2::geom_line(na.rm = TRUE) +
-    ggplot2::theme(legend.position = lg)
+    ggplot2::theme(legend.position = lg) +
+    ggplot2::scale_x_discrete(breaks = breaks)
 }
 #' Spread Brackets.
 #'
