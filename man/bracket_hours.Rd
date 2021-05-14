@@ -8,13 +8,12 @@ bracket_hours(x, cols = 1:ncol(x), bracket_mult = NULL, append = TRUE)
 }
 \arguments{
 \item{x}{A data.frame (also) containing the subjective and retrospectively
-provided practice times of each participant.}
+provided practice times, one row per participant.}
 
-\item{cols}{Either NULL, then all columns are assumed to contain only age
-bracket averages; or a numerical vector of size \code{ncol(x)} indexing
-those columns of \code{x} that contain mean daily hours information; or a
-character string with the names of those columns containing age bracket
-averages.}
+\item{cols}{A numerical vector of size \code{ncol(x)} indexing those columns
+of \code{x} that contain mean daily hours information; or a character
+string with the names of those columns containing age bracket averages. If
+omitted, all columns are assumed to contained practice time data.}
 
 \item{bracket_mult}{A numerical vector giving the durations of each age
 bracket.}

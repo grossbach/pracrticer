@@ -95,7 +95,7 @@ Meta data about the data set can be accessed by:
 
 It resembles real data sets obtained from students at a music conservatory where students were asked to recall the amount of time they spent at their instrument during pre-defined age brackets. The actual question might have been:
 
-> On average, how many hours per day did you spend playing or rehearsing you instrument between the ages of between \<lower bound\>  and \<upper bound\>?
+> On average, how many hours per day did you spend playing or rehearsing you instrument between the ages of \<lower bound\> and \<upper bound\>?
 
 Subjects were reminded that they were asked for the *mean* hours, meaning they had to take the duration of the corresponding bracket into account.
 
@@ -121,36 +121,55 @@ As the present data set in addition to practice time estimates holds both the pa
 
 ```{r RawData, echo=TRUE, anchor=FIGREF}
 plot_it(practicetime, 
-        cols = "\\d{1,2}-\\d{1,2}")
+        cols = "\\d{1,2}-\\d{1,2}") + 
+  xlab("Age Brackets") +
+  ylab("Mean Daily Practice Hours")
 ```
 
 `r figr("RawData", type = FIGREF)`. *Mean daily deliberate practice hours plotted against age brackets. Each line represents one participant and connects the retrospectively collected mean daily hours per age bracket at the instrument.*
 
 ***
 
-From `r figr("RawData")` we can infer that most participants started playing in the second age bracket. There is a trend visible suggesting that mean daily practice time correlates with age. Most subjects were in the second to last age bracket when the study commenced. Many students seem to have ceased intensive practice during their last age bracket.
+The function `plot_it()` returns a $\text{ggplot2}$ object [@Wickham2016] which can be modified using $\text{ggplot}$ functions, as shown in `r figr("RawData")`.
 
-This plot has several problems: (a) The lengths of the age brackets are uneven, tricking the onlooker into misjudging a participant's increase (or decrease) of mean daily practice hours over time. (b) Should the research question pertain to the amount of daily hours during particular age brackets, then apart from (a) this plot is an adequate illustration of the data (but see (c) below). Most of the time the researcher will be interested in practice time dynamics relative to some event---this might be the time of the study or a playing-related injury etc. (c) The seemingly decreasing number of hours during many students last bracket will be dealt with at a later stage (ch. [The Last Age Bracket]).
+The plot shows that most participants started playing in the second age bracket, i.e. between 6 and 8 years of age. There is a trend visible suggesting that mean daily practice time correlates with age, and most subjects were in the second to last age bracket between 21 and 25 years, when the study commenced. Also, it seems, many students show a decreased amount of deliberate practice during their last age bracket.
 
-(a) To avoid the apparent isochrony of age brackets, the function `spread_brackets()` comes in handy:
+This plot has several problems: (a) The lengths of the age brackets are uneven, tricking the onlooker into misjudging a participant's increase (or decrease) of mean daily practice hours over time. (b) Should the research question pertain to the amount of daily hours during particular age brackets, then apart from (a) this plot is an adequate illustration of the data (but see (c) below). Most of the time the researcher will be interested in practice time dynamics relative to some event---this might be the time of the study or a playing-related injury etc. (c) The seemingly decreasing number of hours during many students' last bracket will be dealt with at a later stage (ch. [The Last Age Bracket]).
+
+### (a) Non-Isochronous Age Brackets
+
+To avoid the apparent isochrony of age brackets, the function `spread_brackets()` comes in handy:
 
 ```{r MakeBracketIsochronous, anchor=SRCREF}
 iso_brackets <- spread_brackets(practicetime, 
-                                cols = "\\d{1,2}-\\d{1,2}")
+                                cols = "^\\d{1,2}-\\d{1,2}$")
 ```
 
 The function's first arguments holds the data. If the data set contains more than just the recollected practice times, the argument `cols` needs to provide the names (or indices) of the practice time columns. The function basically repeats the column of a given age bracket as often as the corresponding bracket lasted, and terms each resulting new column according to the age subjects were in each year, optionally with a prefix. This rather convoluted explanation becomes clearer when one looks at a plot of the data over time:
 
 ```{r PlotIsoBrackets, anchor=FIGREF}
 plot_it(iso_brackets, 
-        cols = paste(0:30))
+        cols = paste(0:30)) + 
+  xlab("Age (in yrs.)") +
+  ylab("Mean Daily Practice Hours")
 ```
 
-`r figr("PlotIsoBrackets", type = FIGREF)`. *The same data as in `r figr("RawData")`, but plotted against age in years, so that bracket duration becomes visible.*
+`r figr("PlotIsoBrackets", type = FIGREF)`. *The same data as in `r figr("RawData")`, but plotted against age in years, so that differing bracket durations become visible.*
 
 ***
 
-(b)
+The downside of this artificial increase in temporal resolution is that it now seems that participants who started playing during the first age bracket ([0-5]) already practiced at the age of 0. This will be tackled in the section [A More Sophisticated Approach].
+
+### (b) Temporal Alignment Of Data
+
+The data set `practicetime` is horizontally organized into age brackets, which, in the data set `iso_brackets` have been recalculated to years of age, thus nominally (but not literally!) increasing the temporal resolution. If the data set needs to be aligned with the time the study was undertaken, and the assumption holds that the last bracket of each participant represents the deliberate practice time at the time of the study, then each participants' last entry should be shoved to the right side of the data table.
+
+```{r, echo=TRUE}
+studydatealigned <- align_to(iso_brackets, 
+                             cols = paste(0:30),
+                             align = "last_entry")
+```
+
 
 ## Potential Pitfalls
 
@@ -160,7 +179,7 @@ Looking at the data partially shown in `r figr("ShowDataSet")`, to obtain the cu
 
 When one asks participants to retrospectively estimate their practice time in the past, it apparently is easier for people to name their average daily practice time during a pre-defined age bracket **[citation needed]** than on a yearly basis. Combined with people's date of birth and the date when they filled in the questionnaire, we can calculate their ages at the time of the study. Some participants in the above shown example data set started playing their main instrument at a very early age. They estimated their mean daily practice time in the first age bracket as, e.g. half an hour. The first age bracket in our data set entails the ages [0,5]. Assume participant A started playing at the age of 4 and, for simplicity, additionally assume that they started playing on the day they turned four. When filling out the questionnaire, this required them to average their practice time in the following year over the ages 0 through 5. An average of half an hour over six years equals $0.5\text{h} = 3\text{h} / 6\text{yrs}$. This means they claim to have played an average 3 hours on each day at the age of four. Although this is technically not impossible, it seems to be a bold claim. The more probable explanation is that the question was not properly explained to the participants, thus invalidating the entire data set (some might have misunderstood, while others correctly ). This underlines the requirement for an experimenter to identify difficult questions in pilot studies, and consequentially to either meticulously explain those questionnaire items to participants, or ask simpler questions.
 
-### The Last Age Bracket
+### (c) The Last Age Bracket
 
 In addition to containing answers to possibly misunderstood questions, such data sets may contain a second pitfall, and that is that the last age bracket someone fills in has usually not ended yet. So for the age bracket participants are in at the time of the study, subjects are usually asked to provide the average daily practice hours during the years in this bracket so far. For the analysis this must be taken into account, i.e. these brackets' average times must be recalculated to not under-estimate practice times of the age brackets every participant was in at the time of the study.
 
@@ -235,9 +254,6 @@ Do this for the data set:
 ## e.g. "^[0-9]{1,2}-[0-9]{1,2}$":
 age_range_idx <- grep("[0-9]{1,2}-[0-9]{1,2}", 
                       names(practicetime))
-## Or, equivalently:
-# age_range_idx <- grep("[0-9]{1,2}-[0-9]{1,2}",
-#                       names(practicetime))
 ## Or provide the column indices explicitly:
 # age_range_idx <- c(4:10) 
 ## The multipliers reflect the duration of each bracket in
@@ -280,7 +296,7 @@ ggplot(pt_bh_summary, aes(Bracket, Hours_per_bracket,
   theme(legend.position = "none")
 ```
 
-These calculations assume that the hypothetical subject A played the entire year when they were 26 years old for an average eight daily hours. If we additionally take into account that leap years last an additional day, we need to include the date of birth and the time the subject took part in the investigation. By doing so, we can account for leap years *and* adjust the last bracket's multiplier to the day. And that is what we are going to do next.
+These calculations assume that the hypothetical subject A played the entire year when they were 26 years old for an average eight daily hours. If we additionally take into account that leap years last an additional day, we need to include the date of birth and the time the subject took part in the investigation. By doing so, we can account for leap years *and* adjust the last bracket's multiplier to the day.
 
 ### Unequal Bracket Durations
 
@@ -301,22 +317,30 @@ ptime_sophist <- mutate(practicetime,
 
 First, we need to find the column index of the last age bracket in each subject:
 
-```{r, echo=TRUE}
-## Find last age bracket column for each subject:
+```{r, echo=TRUE, eval=FALSE}
 last_bracket_idx <- col_lastentry(ptime_sophist, 
                                   cols = "\\d{1,2}-\\d{1,2}")
-## Length of each participant's last age bracket:
+```
+
+Determine the length of each participant's last age bracket:
+
+```{r, echo=TRUE, eval=FALSE}
 durations_last_brackets <- names_to_durations(names(ptime_sophist)[last_bracket_idx])
 ```
 
+Because of leap seconds, duration spent in last bracket needs to be calculated in secs (achieved by lubridate::as.duration()) to be unambiguous...
 
-```{r, echo=TRUE}
-## Because of leap seconds, duration spent in last bracket needs to be 
-## calculated in secs (achieved by lubridate::as.duration()) to be unambiguous:
+```{r, echo=TRUE, eval=FALSE}
 duration_spent_in_bracket <- as.duration(years(durations_last_brackets) - 
                                            ptime_sophist$DaysSinceLastBday)
-as.numeric(duration_spent_in_bracket, "years")
 ```
 
-## References
+... and converted to numerical values:
 
+```{r, echo=TRUE, eval=FALSE}
+duration_spent_in_bracket <- as.numeric(duration_spent_in_bracket, 
+                                        "years")
+```
+
+
+## References

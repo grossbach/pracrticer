@@ -104,45 +104,16 @@ bracket_multipliers <- function(x, cols = 1:ncol(x), sep = "-") {
                       sep = "_")
   return(ddf)
 }
-#' Last Column With (Non-NA) Content.
-#'
-#' Returns the column index of the right-most non-NA entry of each row in a
-#' data.frame.
-#'
-#' @param x A data.frame.
-#' @param cols Either a numerical vector indexing the age bracket columns, or a
-#'   character vector with age bracket column names.
-#'
-#' @return A vector with age bracket column indices.
-#' @export
-#'
-#' @examples
-#' d_f <- data.frame(a = c("a", "b", NA), b = c(1, NA, 3))
-#' col_lastentry(d_f)
-col_lastentry = function(x, cols = 1:ncol(x)) {
-  if (is.character(cols)) {
-    bracket_colnames <- bracket_colnames_(x, cols)
-    cols <- col_names_to_indices_(x, bracket_colnames)
-  }
-  idx = ifelse(is.na(x[cols]),
-               0L,
-               col(x))
-  lastentries <- apply(idx, 1, max)
-  names(lastentries) <- NULL
-  lastentries <- lastentries + min(cols) - 1 # add offset
-  return(lastentries)
-}
 #' Bracket Hours.
 #'
 #' Calculates the hours subjects have been practicing during age brackets.
 #'
 #' @param x A data.frame (also) containing the subjective and retrospectively
-#'   provided practice times of each participant.
-#' @param cols Either NULL, then all columns are assumed to contain only age
-#'   bracket averages; or a numerical vector of size \code{ncol(x)} indexing
-#'   those columns of \code{x} that contain mean daily hours information; or a
-#'   character string with the names of those columns containing age bracket
-#'   averages.
+#'   provided practice times, one row per participant.
+#' @param cols A numerical vector of size \code{ncol(x)} indexing those columns
+#'   of \code{x} that contain mean daily hours information; or a character
+#'   string with the names of those columns containing age bracket averages. If
+#'   omitted, all columns are assumed to contained practice time data.
 #' @param bracket_mult A numerical vector giving the durations of each age
 #'   bracket.
 #' @param append A logic value determining whether the function is to return the
@@ -319,4 +290,66 @@ spread_brackets <- function(x, cols = 1:ncol(x), prefix = "", postfix = "") {
     df <- cbind(df, df2)
   }
   return(df)
+}
+#' Align Data Set to Event.
+#'
+#' Given a \code{data.frame} with rows that are (at least partially) left-
+#' and/or right-padded with \code{NA} values (i.e. the number of non-\code{NA}
+#' entries differs between rows), this function aligns the data set according to
+#' \code{align}.
+#'
+#' @param x A data.frame (also) containing subjective and retrospectively
+#'   provided practice times, one row per participant.
+#' @param cols A numerical vector of size \code{ncol(x)} indexing those columns
+#'   of \code{x} that contain mean daily hours information; or a character
+#'   string with the names of those columns containing age bracket averages. If
+#'   omitted, all columns are assumed to contained practice time data.
+#' @param align Either a character string determining whether to align the data
+#'   set with each participants' first (\code{align = "first_entry"}) or last
+#'   entry (\code{align = "last_entry"}), or a numeric vector indexing each
+#'   participant's column with which to align the data set.
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' d_f <- data.frame(`10-12` = c(NA, 1.5, 1.0, NA),
+#'                   `13-14` = c(1.5, 3, 0.75, 1),
+#'                   `15-16` = c(2.5, 4, 1.5, NA)
+#'                   check.names = FALSE)
+#' align_to(d_f, align = "last_entry")
+#' align_to(d_f, align = "first_entry")
+#' align_to(d_f, align = c(2, 2, 1))
+align_to <- function(x, cols = 1:ncol(x), align = NULL) {
+  stopifnot(is.data.frame(x),
+            (is.character(cols) | is.numeric(cols)),
+            is.character(align))
+  if (is.character(cols)) {
+    bracket_colnames <- bracket_colnames_(x,
+                                          cols)
+    cols <- col_names_to_indices_(x,
+                                  bracket_colnames)
+  }
+  aligncol_idx <- align_col_idx_(x,
+                                 cols = cols,
+                                 timepoint = align)
+  n_cols <- max(aligncol_idx)
+  if (is.character(align)) {
+    if (align == "last_entry" | align == "first_entry") {
+      diffs <- n_cols - aligncol_idx
+      if (align == "first_entry") {
+        w <- "left"
+      } else if (align == "last_entry") {
+        w <- "right"
+      }
+    } else {
+      stop("Wrong align value.")
+    }
+  } else if (is.numeric(align)) {
+    stop("Not implemented.")
+  }
+  aligned <- temporal_align_(x,
+                             cols = cols,
+                             padd = diffs,
+                             where = w)
 }

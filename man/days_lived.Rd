@@ -2,7 +2,7 @@
 % Please edit documentation in R/praktikr.R
 \name{days_lived}
 \alias{days_lived}
-\title{Days Lived Since Date-of-birth.}
+\title{Days Lived Since Date Of Birth.}
 \usage{
 days_lived(dob, dte = Sys.Date())
 }

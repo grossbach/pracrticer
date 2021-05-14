@@ -1,6 +1,6 @@
 Package: praktikr
 Title: Retrospectively Estimated Practicing Times in Domain Experts 
-Version: 0.0.0.9010
+Version: 0.0.0.9011
 Authors@R: 
     person(given = "Michael",
            family = "Großbach",
