@@ -161,7 +161,7 @@ align_col_idx_ <- function(x, cols = 1:ncol(x), timepoint = character(0)) {
 #'   string with the names of those columns containing age bracket averages. If
 #'   omitted, all columns are assumed to contained practice time data.
 #' @param padd A numerical vector of length \code{nrow(x)} with the number of
-#'   \code{NA}s to pad each ro with.
+#'   \code{NA}s to pad each row with.
 #' @param where Either a character string determining whether to align the data
 #'   set with the participants' right-most ("right") or left-most entry
 #'   ("left"); or if \code{where} is numeric it is meant to be a column
@@ -169,30 +169,32 @@ align_col_idx_ <- function(x, cols = 1:ncol(x), timepoint = character(0)) {
 #'
 #' @return A \code{data.frame} padded with \code{NA}s on the left and/or on the
 #'   right side.
-#'
+#' @noRd
 #' @examples
 #' d_f <- data.frame(`10-12` = c(NA, 1.5, 1.0, NA),
 #'                   `13-14` = c(1.5, NA, 0.75, 1),
 #'                   `15-16` = c(2.5, NA, 1.5, NA),
 #'                   check.names = FALSE)
-#' temporal_align_(d_f, padd = c(3, 1, 3, 2), where = "right")
+#' temporal_align_(d_f, padd = c(0, 2, 0, 1), where = "right")
 temporal_align_ <- function(x, cols = 1:ncol(x), padd = numeric(nrow(x)), where = NULL) {
-  ncols <- ncol(x[cols])
+  y <- x[cols]
+  ncolsy <- ncol(y)
+  nrowsy <- nrow(y)
   aligned <- matrix(NA,
-                    nrow = nrow(x),
-                    ncol = ncols)
-  for (n in 1:nrow(x)) {
+                    nrow = nrowsy,
+                    ncol = ncolsy)
+  for (n in 1:nrowsy) {
     if (is.character(where)) {
       if (where == "left") {
-        aligned[n, 1:padd[n]] <- x[n, 1:padd[n]]
+        aligned[n, 1:padd[n]] <- y[n, 1:padd[n]]
       } else if (where == "right") {
-        if (is.na(x[n, ncols])) {
-          aligned[n, (ncols - padd[n] + 1):ncols] <- unlist(x[n, cols[n]:padd[n]])
+        if (is.na(y[n, ncolsy])) {
+          aligned[n, (padd[n] + 1):ncolsy] <- unlist(y[n, 1:(ncolsy - padd[n])])
         } else {
-          aligned[n, ] <- unlist(x[n, cols])
+          aligned[n, ] <- unlist(y[n, ])
         }
       } else {
-        stop("Wrong where argument.")
+        stop("Wrong 'where' argument.")
       }
     } else if (is.numeric(where)) {
       stop("Not yet implemented.")
@@ -203,9 +205,9 @@ temporal_align_ <- function(x, cols = 1:ncol(x), padd = numeric(nrow(x)), where 
   aligned <- as.data.frame(aligned)
   if (is.character(where)) {
     if (where == "right") {
-      names(aligned) <- paste(-(ncols - 1):0)
+      names(aligned) <- paste(-(ncolsy - 1):0)
     } else if (where == "left") {
-      names(aligned) <- paste(0:(ncols - 1))
+      names(aligned) <- paste(0:(ncolsy - 1))
     }
   } else if (is.numeric(where)) {
     stop("Not implemented")
