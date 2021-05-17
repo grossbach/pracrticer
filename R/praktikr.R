@@ -114,11 +114,11 @@ bracket_multipliers <- function(x, cols = 1:ncol(x), sep = "-") {
 #'   of \code{x} that contain mean daily hours information; or a character
 #'   string with the names of those columns containing age bracket averages. If
 #'   omitted, all columns are assumed to contained practice time data.
-#' @param bracket_mult A numerical vector giving the durations of each age
+#' @param multiplier A numerical vector giving the duration of each age
 #'   bracket.
 #' @param append A logic value determining whether the function is to return the
-#'   yearly hours appended to \code{x} (TRUE; default), or just the yearly
-#'   hours.
+#'   yearly hours appended to \code{x}, or just the yearly
+#'   hours (FALSE; default).
 #'
 #' @return If \code{append = TRUE} a data.frame of size \code{nrow(x) x (ncol(x)
 #'   + length(bracket_idx))}. If \code{append = FALSE} a data.frame of size
@@ -132,20 +132,19 @@ bracket_multipliers <- function(x, cols = 1:ncol(x), sep = "-") {
 #'                   check.names = FALSE)
 #' bracket_duration <- c(3, 2)
 #' bracket_hours(d_f, "\\d{2}-\\d{2}", bracket_duration)
-bracket_hours <- function(x, cols = 1:ncol(x), bracket_mult = NULL, append = TRUE) {
+bracket_hours <- function(x, cols = 1:ncol(x), multiplier = NULL, append = FALSE) {
   if (is.character(cols)) {
     bracket_colnames <- bracket_colnames_(x, cols)
     cols <- col_names_to_indices_(x, bracket_colnames)
   }
-  bracket_hours <- x[ , cols] * bracket_mult * 365.25
-  names(bracket_hours) <- paste("Hours",
-                                names(x[cols]),
-                                sep = "_")
+  bracket_hours <- x[ , cols] * multiplier * 365.25
+  names(bracket_hours) <- names(x[cols])
   if (append) {
     cbind(x,
           bracket_hours)
   } else {
-    bracket_hours
+    cbind(x[-cols],
+          bracket_hours)
   }
 }
 #' Convert Column Names to Age Bracket Durations.
@@ -216,9 +215,9 @@ plot_it <- function(x, cols = 1:ncol(x), ID = "ID", Group = NULL, legend = FALSE
                                       labels = unique(Age)))
   ## show legend?
   lg <- if(is.logical(legend)) {
-    ifelse(!isTRUE(legend),
-           "none",
-           stop())
+    lg <- ifelse(isTRUE(legend),
+                 "right",
+                 "none")
   } else if(is.character(legend)) {
     lg <- legend
   }

@@ -4,7 +4,7 @@
 \alias{bracket_hours}
 \title{Bracket Hours.}
 \usage{
-bracket_hours(x, cols = 1:ncol(x), bracket_mult = NULL, append = TRUE)
+bracket_hours(x, cols = 1:ncol(x), multiplier = NULL, append = FALSE)
 }
 \arguments{
 \item{x}{A data.frame (also) containing the subjective and retrospectively
@@ -15,12 +15,12 @@ of \code{x} that contain mean daily hours information; or a character
 string with the names of those columns containing age bracket averages. If
 omitted, all columns are assumed to contained practice time data.}
 
-\item{bracket_mult}{A numerical vector giving the durations of each age
+\item{multiplier}{A numerical vector giving the duration of each age
 bracket.}
 
 \item{append}{A logic value determining whether the function is to return the
-yearly hours appended to \code{x} (TRUE; default), or just the yearly
-hours.}
+yearly hours appended to \code{x}, or just the yearly
+hours (FALSE; default).}
 }
 \value{
 If \code{append = TRUE} a data.frame of size \code{nrow(x) x (ncol(x)

@@ -65,12 +65,12 @@ bracket_colnames_ <- function(x, cols) {
 #'   character vector with age bracket column names.
 #'
 #' @return A vector with age bracket column indices.
-#' @noRd
+#' @export
 #'
 #' @examples
 #' d_f <- data.frame(a = c("a", "b", NA), b = c(1, NA, 3))
 #' col_lastentry(d_f)
-col_lastentry_ = function(x, cols = 1:ncol(x)) {
+col_lastentry = function(x, cols = 1:ncol(x)) {
   if (is.character(cols)) {
     bracket_colnames <- bracket_colnames_(x, cols)
     cols <- col_names_to_indices_(x, bracket_colnames)
