@@ -162,7 +162,7 @@ The downside of this artificial increase in temporal resolution is that it now s
 
 ### (b) Temporal Alignment Of Data
 
-The data set `practicetime` is horizontally organized into age brackets, which, in the data set `iso_brackets` have been recalculated to years of age, thus nominally (but not literally!) increasing the temporal resolution. If the data set needs to be aligned with the time the study was undertaken, and the assumption holds that the last bracket of each participant represents the deliberate practice time at the time of the study, then each participants' last entry should be shoved to the right side of the data table.
+The data set `practicetime` is horizontally organized into age brackets, which, in the data set `iso_brackets` have been recalculated to years of age, thus nominally (but not literally!) increasing the temporal resolution. To be able to study the deliberate practice time at the time of the study, the data set needs to be aligned with the time when the study was undertaken. If the assumption holds that the last bracket of each participant represents the deliberate practice time at the time of the study, then each participants' last entry should be shoved to the right side of the data table:
 
 ```{r, echo=TRUE}
 studydatealigned <- align_to(iso_brackets, 
@@ -170,22 +170,29 @@ studydatealigned <- align_to(iso_brackets,
                              align = "last_entry")
 ```
 
+***
+
+`r figr("StudyAlignedData", type = TABREF)`. *The top six rows of the study-time aligned data set.*
+
+```{r StudyAlignedData, anchor = TABREF}
+kable(head(studydatealigned))
+```
 
 ## Potential Pitfalls
 
-Looking at the data partially shown in `r figr("ShowDataSet")`, to obtain the cumulative deliberate practice time, one might be tempted to just multiply each participants' mean daily practice times (measured in hours) by 365 days per year, times the duration of the corresponding age bracket (measured in years), and then sum up all the products within a given participant. 
+Looking at the data partially shown in `r figr("ShowDataSet")`, to obtain the cumulative deliberate practice time, one might be tempted to just multiply each participants' mean daily practice times (measured in hours) by 365 days per year, times the duration of the corresponding age bracket (measured in years), and then sum up all the products within a given participant. Why this approach will not result in the correct amount of deliberate practice time in a age bracket, and hence in a faulty cumulative practice time. The origins of these 
 
 ### The First Age Bracket
 
-When one asks participants to retrospectively estimate their practice time in the past, it apparently is easier for people to name their average daily practice time during a pre-defined age bracket **[citation needed]** than on a yearly basis. Combined with people's date of birth and the date when they filled in the questionnaire, we can calculate their ages at the time of the study. Some participants in the above shown example data set started playing their main instrument at a very early age. They estimated their mean daily practice time in the first age bracket as, e.g. half an hour. The first age bracket in our data set entails the ages [0,5]. Assume participant A started playing at the age of 4 and, for simplicity, additionally assume that they started playing on the day they turned four. When filling out the questionnaire, this required them to average their practice time in the following year over the ages 0 through 5. An average of half an hour over six years equals $0.5\text{h} = 3\text{h} / 6\text{yrs}$. This means they claim to have played an average 3 hours on each day at the age of four. Although this is technically not impossible, it seems to be a bold claim. The more probable explanation is that the question was not properly explained to the participants, thus invalidating the entire data set (some might have misunderstood, while others correctly ). This underlines the requirement for an experimenter to identify difficult questions in pilot studies, and consequentially to either meticulously explain those questionnaire items to participants, or ask simpler questions.
+When one asks participants to retrospectively estimate their practice time in the past, it apparently is easier for people to name their average daily practice time during a pre-defined age bracket **[citation needed]** than on a yearly basis. Combined with people's date of birth and the date when they filled in the questionnaire, we can calculate their ages at the time of the study. Some participants in the above shown example data set started playing their main instrument at a very early age. They estimated their mean daily practice time in the first age bracket as, e.g. half an hour. The first age bracket in our data set entails the ages [0,5]. Assume participant A started playing at the age of 4 and, for simplicity, additionally assume that they started playing on the day they turned four. When filling out the questionnaire, this required them to average their practice time in the following year over the ages 0 through 5. An average of half an hour over six years equals $0.5\text{h} = 3\text{h} / 6\text{yrs}$. This means they claim to have played an average 3 hours on each day at the age of four. Although this is technically not impossible, it seems to be a bold claim. The more probable explanation is that the question was not properly explained to the participants, thus invalidating the entire data set (some might have misunderstood, while others correctly calculated the average). This underlines the requirement for an experimenter to identify difficult questions during pilot studies, and consequentially either meticulously explain those questionnaire items to participants, or rephrase them to become simpler questions.
 
 ### (c) The Last Age Bracket
 
-In addition to containing answers to possibly misunderstood questions, such data sets may contain a second pitfall, and that is that the last age bracket someone fills in has usually not ended yet. So for the age bracket participants are in at the time of the study, subjects are usually asked to provide the average daily practice hours during the years in this bracket so far. For the analysis this must be taken into account, i.e. these brackets' average times must be recalculated to not under-estimate practice times of the age brackets every participant was in at the time of the study.
+In addition to holding answers to possibly misunderstood questions, such data sets may contain a second pitfall, and that is that the last age bracket someone fills in has usually not ended yet. So for the age bracket participants are in at the time of the study, subjects are usually asked to provide the average daily practice hours during the years in this bracket *so far*. For the analysis this must be taken into account, i.e. these brackets' average times must be recalculated to not under-estimate practice times of the age brackets every participant was in at the time of the study. In a study concerned with the current practice time this correction is of eminent importance.
 
 ***
 
-`r figr("IndivPracticeTime", type = TABREF)`. *Artificial practice times data of a 26-year-old participant. The first row shows the age brackets for which the participants were asked to retrospectively provide estimates of their mean daily practice time (in hours). To underscore the unequal durations of brackets in this hypothetical study, the row* Age, in yrs *lists the age the participants were in the corresponding age brackets. The row* Played an instrument *has a plus sign (+) for each age in which the participant played the instrument.* Estimated daily practice hours *lists the times provided by the participant.* Multiplier¹ *is simply the bracket duration (in years, not accounting for leap years; see also note below table).* Corrected multiplier² *shortens the duration of a subject's last bracket to the number of years this person actually lived through this bracket.* Corrected multiplier³ *additionally takes into account the date of birth of a person and corrects the bracket durations for leap years. The rows containing * practice hours per bracket 
+`r figr("IndivPracticeTime", type = TABREF)`. *Artificial practice times data of a 26-year-old participant. The first row shows the age brackets for which the participants were asked to retrospectively provide estimates of their mean daily practice time (in hours). To underscore the unequal durations of brackets in this hypothetical study, the row* Age, in yrs *lists the age the participants were in the corresponding age brackets. The row* Played an instrument *has a plus sign (+) for each age in which the participant played the instrument.* Estimated daily practice hours *lists the times provided by the participant.* Multiplier¹ *is simply the bracket duration (in years, not accounting for leap years; see also note below table).* Corrected multiplier² *shortens the duration of a subject's last bracket to the number of years this person actually lived through this bracket.* Corrected multiplier³ *additionally takes into account the date of birth of a person and corrects the bracket durations for leap years. The rows containing * practice hours per bracket **??**
 
 ```{r IndivPracticeTime, anchor=TABREF}
 ## This chunk intentionally empty
@@ -267,7 +274,7 @@ multipliers <- bracket_multipliers(practicetime,
 # bracket hours:
 practicetime_brackethours <- bracket_hours(practicetime, 
                                            cols = age_range_idx, 
-                                           bracket_mult = multipliers)
+                                           multiplier = multipliers)
 ```
 
 ```{r}
@@ -279,32 +286,21 @@ options(knitr.kable.NA = old_opt)
 ```
 
 ```{r}
-pt_bh_summary <- pivot_longer(practicetime_brackethours, 
-                              cols = starts_with("Hours_"), 
-                              names_to = "Bracket", 
-                              values_to = "Hours_per_bracket")
-pt_bh_summary <- mutate(pt_bh_summary,
-                        Bracket = factor(Bracket,
-                                         ordered = TRUE,
-                                         levels = unique(Bracket),
-                                         labels = unique(Bracket)))
-ggplot(pt_bh_summary, aes(Bracket, Hours_per_bracket, 
-                          group = ID, 
-                          color = ID)) +
-  geom_point(na.rm = TRUE) +
-  geom_line(na.rm = TRUE) +
-  theme(legend.position = "none")
+plot_it(practicetime_brackethours, 
+        cols = "^\\d{1,2}-\\d{1,2}$", 
+        Group = "ID")
 ```
 
-These calculations assume that the hypothetical subject A played the entire year when they were 26 years old for an average eight daily hours. If we additionally take into account that leap years last an additional day, we need to include the date of birth and the time the subject took part in the investigation. By doing so, we can account for leap years *and* adjust the last bracket's multiplier to the day.
+These calculations assume that the hypothetical subject A played the entire year when they were 26 years old for an average eight daily hours. This of course is unlikely to be true. We turn to this problem in section [A More Sophisticated Approach].
 
 ### Unequal Bracket Durations
 
-It is tempting to collapse age ranges less relevant for the calculation of the cumulative practice time to brackets of longer duration. For instance, time spent at the instrument during very early age does not considerably contribute to the target number because very young children usually do not spend large amounts of time **rephrase**doing the same**/rephrase**. While collapsing is generally no problem, it should be noted that subjects need to be instructed properly to ensure they are aware of unequal bracket duration.
+It is tempting to collapse age ranges less relevant for the calculation of the cumulative practice time to brackets of longer duration than brackets where there was potentially more time spent at the instrument. For instance, time spent at the instrument during very early age does not considerably contribute to the target number because very young children usually do not spend large amounts of time **rephrase**doing the same**/rephrase**. While collapsing is generally no problem, it should be noted that subjects need to be instructed properly to ensure they are aware of unequal bracket duration.
 
 ## A More Sophisticated Approach
 
-In the naive approach outlined above it was assumed that subjects 
+In the naive approach outlined above it was assumed that subjects practiced throughout an entire bracket. We had further calculated a year to have 365.25 days to account for leap years. As we already noticed above it would be better to take every participants' date of birth into account to be able to accurately calculate the exact durations of all their brackets.
+While we cannot possibly know anything about the subjects' true practice behavior, we can at least precisely calculate the durations of each of their brackets and thus obtain a more accurate estimate of both their deliberate practice over time as well as their cumulative practice time. To this end the actual time spent in the current, that is the last bracket, has to be calculated:
 
 ```{r, echo=TRUE}
 ## add age and days since last birthday:
@@ -315,31 +311,44 @@ ptime_sophist <- mutate(practicetime,
                                                             Date))
 ```
 
-First, we need to find the column index of the last age bracket in each subject:
+Next, we need to find the column index of the last age bracket in each subject:
 
 ```{r, echo=TRUE, eval=FALSE}
 last_bracket_idx <- col_lastentry(ptime_sophist, 
                                   cols = "\\d{1,2}-\\d{1,2}")
 ```
 
-Determine the length of each participant's last age bracket:
+Finally, we determine the length of each participant's last age bracket:
 
 ```{r, echo=TRUE, eval=FALSE}
-durations_last_brackets <- names_to_durations(names(ptime_sophist)[last_bracket_idx])
+duration_last_bracket <- names_to_durations(names(ptime_sophist)[last_bracket_idx])
 ```
 
-Because of leap seconds, duration spent in last bracket needs to be calculated in secs (achieved by lubridate::as.duration()) to be unambiguous...
+Because of leap seconds, duration spent in last bracket needs to be calculated in secs (achieved by lubridate::as.duration()) to be unambiguous:
 
 ```{r, echo=TRUE, eval=FALSE}
-duration_spent_in_bracket <- as.duration(years(durations_last_brackets) - 
+duration_spent_in_bracket <- as.duration(years(duration_last_bracket) - 
                                            ptime_sophist$DaysSinceLastBday)
 ```
 
-... and converted to numerical values:
+These need to be then converted to numerical values:
 
 ```{r, echo=TRUE, eval=FALSE}
 duration_spent_in_bracket <- as.numeric(duration_spent_in_bracket, 
-                                        "years")
+                                        "seconds")
+```
+
+Those then need to be divided by 86400 (= 60s x 60m x 24h) to obtain the number of days in this bracket. The number of days is then multiplied with the mean daily practice time to arrive at this bracket's total practice hours.
+
+This actually needs to be done with all the other brackets too. All this can be achieved with one simple command, $\text{praktikr}$'s `exact_duration()`:
+
+```{r}
+ptime_sophist2 <- exact_duration(ptime_sophist, 
+                                 cols = "^\\d{1,2}-\\d{1,2}$",
+                                 align = "right", # align data set left, right, or at specific date?
+                                 dos = Date,
+                                 dob = DOB, # date of birth to increase duration accuracy
+                                 pract_start = NULL) # year when practice began
 ```
 
 

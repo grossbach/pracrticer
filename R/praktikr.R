@@ -15,7 +15,7 @@
 #' days_lived(lubridate::ymd("1995-01-28"), lubridate::ymd("2021-01-27")) # "25y 11m 30d 0H 0M 0S"
 #' days_lived(as.Date("2020-02-28"), as.Date("2021-02-27")) # "11m 30d 0H 0M 0S"
 days_lived <- function(dob, dte = Sys.Date()) {
-  interv <- lubridate::interval(dob,
+  interv <- lubridate::interval(!!enquo(dob),
                                 dte)
   age <- lubridate::as.period(interv,
                               unit = "years")
@@ -24,7 +24,8 @@ days_lived <- function(dob, dte = Sys.Date()) {
 #' Days Since Last Birthday.
 #'
 #' @param dob Date of birth (\code{Date} object).
-#' @param today Today's date (\code{Date} object).
+#' @param today Today's date (\code{Date} object) (defaults to
+#'   \code{Sys.Date()}.
 #'
 #' @return Days since last birthday (\code{lubridate::interval} object).
 #' @export
@@ -39,9 +40,9 @@ days_lived <- function(dob, dte = Sys.Date()) {
 days_since_bday <- function(dob, today = Sys.Date()) {
   ## to do:
   ## Test dob and today for valid format (proper class &c.)
-  current_year <- lubridate::year(today)
-  month_dob <- lubridate::month(dob)
-  day_dob <- lubridate::day(dob)
+  current_year <- lubridate::year(!!enquo(today))
+  month_dob <- lubridate::month(!!enquo(dob)) # see ?`!!`
+  day_dob <- lubridate::day(!!enquo(dob))
   bday_current_year <- lubridate::ymd(paste(current_year,
                                             month_dob,
                                             day_dob,
@@ -52,13 +53,13 @@ days_since_bday <- function(dob, today = Sys.Date()) {
   pos_idx <- date_diff >= 0
   neg_idx <- date_diff < 0
   days <- vector(mode = "integer",
-                 length = length(dob)) # There must be a more elegant
-  days <- lubridate::as.period(days)   # way of doing this!?
+                 length = length(!!enquo(dob))) # There must be a more elegant
+  days <- lubridate::as.period(days)            # way of doing this!?
   days[neg_idx] <- lubridate::as.period(lubridate::interval(lubridate::ymd(paste(current_year - 1,
                                                                                  month_dob,
                                                                                  day_dob,
                                                                                  sep = "-")),
-                                                            today),
+                                                            !!enquo(today)),
                                         unit = "days")[neg_idx]
   days[pos_idx] <- date_diff[pos_idx]
   return(days)
@@ -352,3 +353,53 @@ align_to <- function(x, cols = 1:ncol(x), align = NULL) {
                              padd = diffs,
                              where = w)
 }
+#' Exact, Leap Year-aware Duration.
+#'
+#'
+#'
+#' @param x A data.frame (also) containing subjective and retrospectively
+#'   provided practice times, one row per participant.
+#' @param cols A numerical vector of size \code{ncol(x)} indexing those columns
+#'   of \code{x} that contain mean daily hours information; or a character
+#'   string with the names of those columns containing age bracket averages. If
+#'   omitted, all columns are assumed to contained practice time data.
+#' @param align Either a character string determining whether to align the data
+#'   set with each participants' first (\code{align = "first_entry"}) or last
+#'   entry (\code{align = "last_entry"}), or a numeric vector indexing each
+#'   participant's column with which to align the data set.
+#' @param dos Optional (character string) column name with dates of filling in
+#'   the questionnaire (date of study).
+#' @param dob Optional (character string) column name with dates of birth.
+#' @param dop Optional (character string) column name with dates of
+#'   practice commencement (date of practice).
+#'
+#' @return A \code{data.frame} with exact practice times.
+#' @export
+#'
+#' @examples
+exact_duration <- function(x, cols = 1:ncol(x), align = NULL, dos = NULL, dob = NULL, pract_start = NULL) {
+  stopifnot(is.data.frame(x),
+            (is.character(cols) | is.numeric(cols)),
+            is.character(align))
+  if (is.character(cols)) {
+    bracket_colnames <- bracket_colnames_(x,
+                                          cols)
+    cols <- col_names_to_indices_(x,
+                                  bracket_colnames)
+  }
+  if (!is.null(dob) & !is.null(dos)) {
+    x <- dplyr::mutate(x,
+                       Age = days_lived(dob,
+                                        dos),
+                       DaysSinceLastBday = days_since_bday(dob,
+                                                           dos))
+    cols <- cols + 2
+  }
+  y <- x[cols]
+}
+my1st <- function(df, arg) {
+  my2nd(df, !!enquo(arg))
+}
+my2nd <- function(d_f, variable) {
+  dplyr::summarise(d_f, mean = mean(!!enquo(variable)))
+  }
