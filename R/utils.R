@@ -143,7 +143,7 @@ align_col_idx_ <- function(x, cols = 1:ncol(x), timepoint = character(0)) {
     cols <- col_names_to_indices_(x, bracket_colnames)
   }
   switch(timepoint,
-         last_entry = col_lastentry_(x, cols),
+         last_entry = col_lastentry(x, cols),
          first_entry = col_firstentry_(x, cols))
 }
 #' Pad \code{data.frame} Rows with \code{NA} Values.

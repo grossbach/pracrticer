@@ -9,7 +9,8 @@ days_since_bday(dob, today = Sys.Date())
 \arguments{
 \item{dob}{Date of birth (\code{Date} object).}
 
-\item{today}{Today's date (\code{Date} object).}
+\item{today}{Today's date (\code{Date} object) (defaults to
+\code{Sys.Date()}.}
 }
 \value{
 Days since last birthday (\code{lubridate::interval} object).

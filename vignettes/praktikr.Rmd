@@ -108,10 +108,12 @@ kable(rbind(head(practicetime),
             tail(practicetime)))
 ```
 
-For ease of further processing, it is convenient to coerce the ID column to a factor:
+For ease of further processing, it is convenient to coerce the ID column to a factor and rename the column *Date* to avoid future conflicts with the function `lubridate::Date()`:
 
 ```{r, echo=TRUE}
-practicetime %>% mutate(ID = factor(ID)) ->
+practicetime %>% mutate(ID = factor(ID),
+                        SDate = Date, # "StudyDATE
+                        Date = NULL) -> 
   practicetime
 ```
 
@@ -300,15 +302,15 @@ It is tempting to collapse age ranges less relevant for the calculation of the c
 ## A More Sophisticated Approach
 
 In the naive approach outlined above it was assumed that subjects practiced throughout an entire bracket. We had further calculated a year to have 365.25 days to account for leap years. As we already noticed above it would be better to take every participants' date of birth into account to be able to accurately calculate the exact durations of all their brackets.
-While we cannot possibly know anything about the subjects' true practice behavior, we can at least precisely calculate the durations of each of their brackets and thus obtain a more accurate estimate of both their deliberate practice over time as well as their cumulative practice time. To this end the actual time spent in the current, that is the last bracket, has to be calculated:
+While we cannot possibly know anything about the subjects' true practice behavior, we can at least precisely calculate the durations of each of their brackets and thus hopefully obtain a more accurate estimate of both their *deliberate practice over time* as well as their *cumulative practice time*. To this end the actual time spent in the current, that is the last bracket, has to be calculated:
 
 ```{r, echo=TRUE}
 ## add age and days since last birthday:
 ptime_sophist <- mutate(practicetime,
                         Age = days_lived(DOB, 
-                                         Date),
+                                         SDate),
                         DaysSinceLastBday = days_since_bday(DOB, 
-                                                            Date))
+                                                            SDate))
 ```
 
 Next, we need to find the column index of the last age bracket in each subject:
@@ -340,15 +342,20 @@ duration_spent_in_bracket <- as.numeric(duration_spent_in_bracket,
 
 Those then need to be divided by 86400 (= 60s x 60m x 24h) to obtain the number of days in this bracket. The number of days is then multiplied with the mean daily practice time to arrive at this bracket's total practice hours.
 
-This actually needs to be done with all the other brackets too. All this can be achieved with one simple command, $\text{praktikr}$'s `exact_duration()`:
+This actually needs to be done with all the other brackets too.
+
+## Yet A Better Approach
+
+
 
 ```{r}
-ptime_sophist2 <- exact_duration(ptime_sophist, 
-                                 cols = "^\\d{1,2}-\\d{1,2}$",
-                                 align = "right", # align data set left, right, or at specific date?
-                                 dos = Date,
-                                 dob = DOB, # date of birth to increase duration accuracy
-                                 pract_start = NULL) # year when practice began
+# ptime_sophist2 <- exact_duration(ptime_sophist, 
+#                                  cols = "^\\d{1,2}-\\d{1,2}$",
+#                                  align = "right", # align data set left, right, or at specific date?
+#                                  dos = "SDate",
+#                                  dob = "DOB", # date of birth to increase duration accuracy
+#                                  dop = NULL, # date of commencement of instrument playing
+#                                  expand_brackets = TRUE) # expand brackets to years? year when practice began
 ```
 
 
