@@ -15,10 +15,12 @@
 #' days_lived(lubridate::ymd("1995-01-28"), lubridate::ymd("2021-01-27")) # "25y 11m 30d 0H 0M 0S"
 #' days_lived(as.Date("2020-02-28"), as.Date("2021-02-27")) # "11m 30d 0H 0M 0S"
 days_lived <- function(dob, dte = Sys.Date()) {
-  interv <- lubridate::interval(!!enquo(dob),
+  # interv <- lubridate::interval(!!rlang::enquo(dob),
+  #                               dte)
+  interv <- lubridate::interval(dob,
                                 dte)
   age <- lubridate::as.period(interv,
-                              unit = "years")
+                              unit = "days")
   return(age)
 }
 #' Days Since Last Birthday.
@@ -40,9 +42,9 @@ days_lived <- function(dob, dte = Sys.Date()) {
 days_since_bday <- function(dob, today = Sys.Date()) {
   ## to do:
   ## Test dob and today for valid format (proper class &c.)
-  current_year <- lubridate::year(!!enquo(today))
-  month_dob <- lubridate::month(!!enquo(dob)) # see ?`!!`
-  day_dob <- lubridate::day(!!enquo(dob))
+  current_year <- lubridate::year(today)
+  month_dob <- lubridate::month(dob) # see ?`!!`
+  day_dob <- lubridate::day(dob)
   bday_current_year <- lubridate::ymd(paste(current_year,
                                             month_dob,
                                             day_dob,
@@ -53,13 +55,13 @@ days_since_bday <- function(dob, today = Sys.Date()) {
   pos_idx <- date_diff >= 0
   neg_idx <- date_diff < 0
   days <- vector(mode = "integer",
-                 length = length(!!enquo(dob))) # There must be a more elegant
+                 length = length(dob)) # There must be a more elegant
   days <- lubridate::as.period(days)            # way of doing this!?
   days[neg_idx] <- lubridate::as.period(lubridate::interval(lubridate::ymd(paste(current_year - 1,
                                                                                  month_dob,
                                                                                  day_dob,
                                                                                  sep = "-")),
-                                                            !!enquo(today)),
+                                                            today),
                                         unit = "days")[neg_idx]
   days[pos_idx] <- date_diff[pos_idx]
   return(days)

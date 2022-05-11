@@ -95,7 +95,7 @@ Meta data about the data set can be accessed by:
 
 It resembles real data sets obtained from students at a music conservatory where students were asked to recall the amount of time they spent at their instrument during pre-defined age brackets. The actual question might have been:
 
-> On average, how many hours per day did you spend playing or rehearsing you instrument between the ages of \<lower bound\> and \<upper bound\>?
+> On average, how many hours per day did you spend playing or rehearsing your instrument between the ages of \<lower bound\> and \<upper bound\>?
 
 Subjects were reminded that they were asked for the *mean* hours, meaning they had to take the duration of the corresponding bracket into account.
 
@@ -346,8 +346,8 @@ This actually needs to be done with all the other brackets too. All this can be 
 ptime_sophist2 <- exact_duration(ptime_sophist, 
                                  cols = "^\\d{1,2}-\\d{1,2}$",
                                  align = "right", # align data set left, right, or at specific date?
-                                 dos = Date,
-                                 dob = DOB, # date of birth to increase duration accuracy
+                                 dos = ptime_sophist$Date,
+                                 dob = ptime_sophist$DOB, # date of birth to increase duration accuracy
                                  pract_start = NULL) # year when practice began
 ```
 
